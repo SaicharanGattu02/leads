@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-
-import 'Laeds/AddLeads.dart';
+import 'package:leads/screens/AddLeads.dart';
 
 void main() {
   runApp(const MyApp());
