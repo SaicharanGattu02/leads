@@ -1,15 +1,15 @@
 class GetServiceModel {
   bool? status;
-  List<Data>? data;
+  List<Services>? service;
 
-  GetServiceModel({this.status, this.data});
+  GetServiceModel({this.status, this.service});
 
   GetServiceModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     if (json['data'] != null) {
-      data = <Data>[];
+      service = <Services>[];
       json['data'].forEach((v) {
-        data!.add(new Data.fromJson(v));
+        service!.add(new Services.fromJson(v));
       });
     }
   }
@@ -17,28 +17,28 @@ class GetServiceModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
-    if (this.data != null) {
-      data['data'] = this.data!.map((v) => v.toJson()).toList();
+    if (this.service != null) {
+      data['data'] = this.service!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Data {
+class Services {
   int? pid;
   String? projectName;
   int? amount;
   String? companyid;
   Null? projectimage;
 
-  Data(
+  Services(
       {this.pid,
         this.projectName,
         this.amount,
         this.companyid,
         this.projectimage});
 
-  Data.fromJson(Map<String, dynamic> json) {
+  Services.fromJson(Map<String, dynamic> json) {
     pid = json['pid'];
     projectName = json['Project_Name'];
     amount = json['amount'];

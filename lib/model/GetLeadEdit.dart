@@ -1,15 +1,15 @@
-class GetLeadData {
+class GetLeadEdit {
   bool? status;
-  List<Leads>? leads;
+  List<LeadsEdit>? leadsdata;
 
-  GetLeadData({this.status, this.leads});
+  GetLeadEdit({this.status, this.leadsdata});
 
-  GetLeadData.fromJson(Map<String, dynamic> json) {
+  GetLeadEdit.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     if (json['leads'] != null) {
-      leads = <Leads>[];
+      leadsdata = <LeadsEdit>[];
       json['leads'].forEach((v) {
-        leads!.add(new Leads.fromJson(v));
+        leadsdata!.add(new LeadsEdit.fromJson(v));
       });
     }
   }
@@ -17,14 +17,14 @@ class GetLeadData {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
-    if (this.leads != null) {
-      data['leads'] = this.leads!.map((v) => v.toJson()).toList();
+    if (this.leadsdata != null) {
+      data['leads'] = this.leadsdata!.map((v) => v.toJson()).toList();
     }
     return data;
   }
 }
 
-class Leads {
+class LeadsEdit {
   int? leadid;
   String? customer;
   String? ogrinazation;
@@ -65,11 +65,8 @@ class Leads {
   String? companyid;
   Null? leaddata;
   Null? dealdata;
-  String? imagepath;
-  int? uid;
-  String? fullname;
 
-  Leads(
+  LeadsEdit(
       {this.leadid,
         this.customer,
         this.ogrinazation,
@@ -109,12 +106,9 @@ class Leads {
         this.leadstagetext,
         this.companyid,
         this.leaddata,
-        this.dealdata,
-        this.imagepath,
-        this.uid,
-        this.fullname});
+        this.dealdata});
 
-  Leads.fromJson(Map<String, dynamic> json) {
+  LeadsEdit.fromJson(Map<String, dynamic> json) {
     leadid = json['leadid'];
     customer = json['customer'];
     ogrinazation = json['ogrinazation'];
@@ -155,9 +149,6 @@ class Leads {
     companyid = json['companyid'];
     leaddata = json['leaddata'];
     dealdata = json['dealdata'];
-    imagepath = json['imagepath'];
-    uid = json['uid'];
-    fullname = json['fullname'];
   }
 
   Map<String, dynamic> toJson() {
@@ -202,9 +193,6 @@ class Leads {
     data['companyid'] = this.companyid;
     data['leaddata'] = this.leaddata;
     data['dealdata'] = this.dealdata;
-    data['imagepath'] = this.imagepath;
-    data['uid'] = this.uid;
-    data['fullname'] = this.fullname;
     return data;
   }
 }
