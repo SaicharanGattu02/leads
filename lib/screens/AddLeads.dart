@@ -38,6 +38,7 @@ class _ViewLeadsState extends State<ViewLeads> {
   String _validateDate = "";
   String _validateRemarks = "";
   String _validateCustomer = "";
+
   String _validateCompany = "";
   String _validatePhoneNumber = "";
   String _validateservice = "";
