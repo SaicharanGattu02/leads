@@ -51,13 +51,13 @@ class Leads {
   String? createdBy;
   int? createdById;
   int? status;
-  Null? expacteddate;
+  String? expacteddate;
   Null? filepath;
   Null? content;
   Null? team;
   int? dealstatus;
   Null? leadComments;
-  Null? dealfixdate;
+  String? dealfixdate;
   String? leadsource;
   int? leadstage;
   String? color;

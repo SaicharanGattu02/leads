@@ -1,10 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:leads/Providers/ConnectivityProviders.dart';
+import 'package:leads/screens/SignIn.dart';
+import 'package:leads/screens/Spalsh.dart';
 import 'package:leads/screens/ViewLeads.dart';
 import 'package:leads/screens/AddLeads.dart';
+import 'package:provider/provider.dart';
 
 
 void main() {
-  runApp(const MyApp());
+  runApp
+    (MultiProvider(providers: [
+    ChangeNotifierProvider(
+      create: (context) => ConnectivityProviders(),
+    ),
+
+  ],child:   const MyApp()));
+
 }
 
 class MyApp extends StatelessWidget {
@@ -57,7 +68,7 @@ class MyApp extends StatelessWidget {
           colorScheme: const ColorScheme.light(background: Colors.white)
               .copyWith(background: Colors.white),
         ),
-      home:AddLeads()
+      home:Splash()
     );
   }
 }

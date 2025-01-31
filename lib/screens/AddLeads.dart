@@ -1,8 +1,11 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:leads/Providers/ConnectivityProviders.dart';
 import 'package:leads/model/LoginModel.dart';
+import 'package:leads/screens/NoInterNet.dart';
 import 'package:leads/service/CustomSnackBar.dart';
+import 'package:provider/provider.dart';
 
 import '../model/GetLeadEdit.dart';
 import '../model/GetStaffModel.dart';
@@ -63,11 +66,18 @@ class _ViewLeadsState extends State<ViewLeads> {
     'Hot',
     'Warm',
   ];
+  @override
+  void dispose() {
+    Provider.of<ConnectivityProviders>(context, listen: false).dispose();
+    super.dispose();
+  }
+
 
   @override
   void initState() {
     super.initState();
-
+    Provider.of<ConnectivityProviders>(context, listen: false)
+        .initConnectivity();
     _DateController.addListener(() {
       setState(() {
         _validateDate = "";
@@ -299,10 +309,10 @@ _isLoading=
           _customerController.text,
           _companyController.text,
           _phoneNumberController.text,
-          servicename!,
-          lead_source!,
+          servicename??"",
+          lead_source??"",
           selectedValue.toString(),
-          lead_owner!,
+          lead_owner??"",
           _priceController.text,
           _cityController.text,
           _remarksController.text,
@@ -338,13 +348,16 @@ _isLoading=
   Widget build(BuildContext context) {
     var w = MediaQuery.of(context).size.width;
     var h = MediaQuery.of(context).size.width;
-    return Scaffold(
+    var connectiVityStatus = Provider.of<ConnectivityProviders>(context);
+    return (connectiVityStatus.isDeviceConnected == "ConnectivityResult.wifi" ||
+        connectiVityStatus.isDeviceConnected == "ConnectivityResult.mobile")
+        ? Scaffold(
       backgroundColor: const Color(0xffF3ECFB),
       appBar: AppBar(
         leading: Padding(
           padding: const EdgeInsets.only(left: 20),
           child: Image.asset(
-            "assets/pixl.png",
+            "assets/Ozriit.png",
             width: 89,
             height:40,fit: BoxFit.fitWidth,
 
@@ -374,11 +387,7 @@ _isLoading=
           )
         ],
       ),
-      body: _isLoading
-          ? Center(
-              child: CircularProgressIndicator(),
-            )
-          : SingleChildScrollView(
+      body:SingleChildScrollView(
               child: Container(
                 margin: EdgeInsets.all(16),
                 child: Column(
@@ -1107,7 +1116,9 @@ _isLoading=
                   borderRadius: BorderRadius.circular(7),
                 ),
                 child: Center(
-                  child: Text(
+                  child:  _isLoading
+                      ? CircularProgressIndicator(color: Colors.white,strokeWidth: 1,)
+                      : Text(
                     'Save',
                     style: TextStyle(
                       color: Color(0xffffffff),
@@ -1122,7 +1133,7 @@ _isLoading=
           ],
         ),
       ),
-    );
+    )        : NoInternetWidget();
   }
 
   Widget _buildTextFormField(

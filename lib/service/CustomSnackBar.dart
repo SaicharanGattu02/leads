@@ -9,7 +9,7 @@ class CustomSnackBar {
           message,
           style: TextStyle(color: Colors.white, fontFamily: "Inter"),
         ),
-        duration: Duration(seconds: 1),
+        duration: Duration(seconds: 2),
         backgroundColor: Color(0xFF8856F4),
       ),
     );
