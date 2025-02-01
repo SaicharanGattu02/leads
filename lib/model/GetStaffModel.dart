@@ -1,15 +1,15 @@
 class GetStaffModel {
   bool? status;
-  List<Staff>? staff;
+  List<Staff>? stafflist;
 
-  GetStaffModel({this.status, this.staff});
+  GetStaffModel({this.status, this.stafflist});
 
   GetStaffModel.fromJson(Map<String, dynamic> json) {
     status = json['status'];
     if (json['data'] != null) {
-      staff = <Staff>[];
+      stafflist = <Staff>[];
       json['data'].forEach((v) {
-        staff!.add(new Staff.fromJson(v));
+        stafflist!.add(new Staff.fromJson(v));
       });
     }
   }
@@ -17,8 +17,8 @@ class GetStaffModel {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
-    if (this.staff != null) {
-      data['data'] = this.staff!.map((v) => v.toJson()).toList();
+    if (this.stafflist != null) {
+      data['data'] = this.stafflist!.map((v) => v.toJson()).toList();
     }
     return data;
   }
@@ -31,7 +31,7 @@ class Staff {
   int? role;
   int? mobile;
   String? designation;
-  Null? imagepath;
+  String? imagepath;
   int? status;
   String? companyname;
   String? companyid;
@@ -42,11 +42,11 @@ class Staff {
   int? expstatus;
   int? editAccess;
   int? deleteAccess;
-  Null? createdAt;
-  Null? updatedAt;
-  Null? emailOtp;
+  String? createdAt;
+  String? updatedAt;
+  int? emailOtp;
   int? emailOtpStatus;
-  Null? emailOtpTime;
+  String? emailOtpTime;
 
   Staff(
       {this.uid,

@@ -28,7 +28,7 @@ class Data {
   int? lsid;
   String? leadsource;
   String? companyid;
-  Null? imagepath;
+  String? imagepath;
 
   Data({this.lsid, this.leadsource, this.companyid, this.imagepath});
 

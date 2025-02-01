@@ -45,10 +45,13 @@ Future<bool> CheckHeaderValidity() async {
     }
 
     // Token expired, attempt to refresh
-    SignInModel? response = await Userapi.UpdateRefreshToken(refreshToken);
+    var response = await Userapi.UpdateRefreshToken();
     if (response != null && response.accessToken != null) {
+      int currentTimestampInSeconds =
+          DateTime.now().millisecondsSinceEpoch ~/ 1000;
+      int expiryTimestamp = currentTimestampInSeconds + (response.expiresIn ?? 0);
       PreferenceService().saveString('access_token', response.accessToken?? "");
-      PreferenceService().saveInt('expire_time', response.expiresIn ?? 0);
+      PreferenceService().saveInt('expire_time', expiryTimestamp);
       return true;
     }
   } catch (e) {

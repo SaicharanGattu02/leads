@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:leads/Providers/ConnectivityProviders.dart';
+import 'package:leads/Providers/ViewLeadsProviders.dart';
 import 'package:leads/screens/SignIn.dart';
 import 'package:leads/screens/Spalsh.dart';
 import 'package:leads/screens/ViewLeads.dart';
@@ -12,6 +13,8 @@ void main() {
     (MultiProvider(providers: [
     ChangeNotifierProvider(
       create: (context) => ConnectivityProviders(),
+    ),ChangeNotifierProvider(
+      create: (context) => ViewLeadsProviders(),
     ),
 
   ],child:   const MyApp()));

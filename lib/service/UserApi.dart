@@ -20,7 +20,7 @@ class Userapi {
   static Future<GetSourceModel?> GetSource() async {
     try {
       final headers = await getheader();
-      final url = Uri.parse("${host}/api/mysource");
+      final url = Uri.parse("${host}/api/mysources");
       final res = await get(url, headers: headers);
       if (res != null) {
         print("GetSource Response:${res.body}");
@@ -35,8 +35,8 @@ class Userapi {
     }
   }
 
-  static Future<SignInModel?> SignIn(
-      String email, String password, BuildContext context) async {
+  static Future<SignInModel?> SignIn(String email, String password,
+      BuildContext context) async {
     try {
       Map<String, String> data = {
         "email": email,
@@ -74,7 +74,7 @@ class Userapi {
   static Future<GetServiceModel?> getService() async {
     try {
       final headers = await getheader();
-      final url = Uri.parse("${host}/api/myservices");
+      final url = Uri.parse("${host}/api/myservice");
       final res = await get(url, headers: headers);
       if (res != null) {
         print("getService Response:${res.body}");
@@ -126,16 +126,17 @@ class Userapi {
     }
   }
 
-  static Future<GetLeadData?> getLeads(BuildContext context) async {
+  static Future<GetLeadData?> getLeads(page,BuildContext context) async {
     try {
       final headers = await getheader();
-      final url = Uri.parse("${host}/api/getleaddata");
+      final url = Uri.parse("${host}/api/getleaddata?page=${page}");
       final res = await get(url, headers: headers);
+
       if (res != null) {
         final jsonResponse = jsonDecode(res.body);
         final jsonmesage = jsonResponse['message'];
 
-        if(jsonResponse['status']==false){
+        if (jsonResponse['status'] == false) {
           CustomSnackBar.show(context, jsonmesage ?? '');
         }
 
@@ -151,23 +152,24 @@ class Userapi {
     }
   }
 
-  static Future<LeadData?> addLeadData(
-    String customerName,
-    String companyName,
-    String phoneNumber,
-    String service,
-    String leadSource,
-    String priority,
-    String staff,
-    String price,
-    String city,
-    String remarks,
-  ) async {
+  static Future<LeadData?> addLeadData(String customerName,
+      String companyName,
+      String phoneNumber,
+      String service,
+      String leadSource,
+      String priority,
+      String staff,
+      String price,
+      String city,
+      String remarks,
+      String leadOwnerid,
+      ) async {
     final sessionid = await PreferenceService().getString("access_token");
     final url = Uri.parse('${host}/api/addleaddata');
+    // final String userid= PreferenceService().getString('user_id') as String;
 
     var request = http.MultipartRequest('POST', url)
-      // ..fields['created_at'] = date
+    // ..fields['created_at'] = date
       ..headers['Authorization'] = 'Bearer ${sessionid}'
       ..fields['customer'] = customerName
       ..fields['Orginazation'] = companyName // Make sure this is correct
@@ -179,8 +181,7 @@ class Userapi {
       ..fields['leadsource'] = leadSource
       ..fields['city'] = city
       ..fields['Priotity'] = priority
-      ..fields['ownerid'] = "134"
-      ..fields['leadOwnerid'] = "134"
+      ..fields['leadOwnerid'] =leadOwnerid
       ..fields['amount'] = price;
 
     print("request fields:${request.fields}");
@@ -203,25 +204,36 @@ class Userapi {
     }
   }
 
-  static Future<LeadData?> UpdateLead(
-    id,
-    String customerName,
-    String companyName,
-    String phoneNumber,
-    String service,
-    String leadSource,
-    String priority,
-    String staff,
-    String price,
-    String city,
-    String remarks,
-  ) async {
+  static Future<LeadData?> UpdateLead(id,
+      String customerName,
+      String companyName,
+      String phoneNumber,
+      String service,
+      String leadSource,
+      String priority,
+      String staff,
+      String price,
+      String city,
+      String remarks, String leadOwnerid,) async {
     final sessionid = await PreferenceService().getString("access_token");
-    final url = Uri.parse('${host}/update_lead/${id}');
+    final url = Uri.parse('${host}/api/update_lead/${id}');
 
     var request = http.MultipartRequest('POST', url)
 
-      // ..fields['created_at'] = date
+    // ..fields['created_at'] = date
+    //   ..headers['Authorization'] = 'Bearer ${sessionid}'
+    //   ..fields['customer'] = customerName
+    //   ..fields['Orginazation'] = companyName // Make sure this is correct
+    //   ..fields['Title'] = service
+    //   ..fields['Description'] = remarks
+    //   ..fields['mobile'] = phoneNumber
+    //   ..fields['email'] =
+    //       "sk.asif0490@gmail.com" // Ensure it's properly formatted
+    //   ..fields['leadsource'] = leadSource
+    //   ..fields['city'] = city
+    //   ..fields['Priotity'] = priority
+    //   ..fields['leadOwnerid'] = leadOwnerid
+    //   ..fields['amount'] = price;
       ..headers['Authorization'] = 'Bearer ${sessionid}'
       ..fields['customer'] = customerName
       ..fields['Orginazation'] = companyName // Make sure this is correct
@@ -233,8 +245,7 @@ class Userapi {
       ..fields['leadsource'] = leadSource
       ..fields['city'] = city
       ..fields['Priotity'] = priority
-      ..fields['ownerid'] = "134"
-      ..fields['leadOwnerid'] = "134"
+      ..fields['leadOwnerid'] =leadOwnerid
       ..fields['amount'] = price;
 
     print("request fields:${request.fields}");
@@ -254,18 +265,13 @@ class Userapi {
     }
   }
 
-  static Future<SignInModel?> UpdateRefreshToken(String refresh) async {
+  static Future<SignInModel?> UpdateRefreshToken() async {
     try {
-      Map<String, String> data = {
-        "access_token": refresh,
-      };
-      final url = Uri.parse("${host}/api/login");
+      final url = Uri.parse("${host}/api/refresh");
+      final headers = await getheader();
       final response = await http.post(
         url,
-        headers: {
-          HttpHeaders.contentTypeHeader: "application/json",
-        },
-        body: jsonEncode(data),
+        headers: headers,
       );
       if (response != null) {
         final jsonResponse = jsonDecode(response.body);

@@ -1,5 +1,6 @@
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:leads/Providers/ConnectivityProviders.dart';
 import 'package:leads/model/LoginModel.dart';
@@ -12,6 +13,7 @@ import '../model/GetStaffModel.dart';
 import '../model/ServiceModel.dart';
 import '../model/SourceModel.dart';
 
+import '../service/Preferances.dart';
 import '../service/UserApi.dart';
 import 'ViewLeads.dart';
 import 'ShakeWidget.dart';
@@ -58,8 +60,7 @@ class _ViewLeadsState extends State<ViewLeads> {
   String? lead_source;
   String? lead_owner;
   int? leadsource_id;
-  int? leadowner_id ;
-
+  int leadowner_id = 0;
 
   final List<String> items = [
     'Cold',
@@ -71,7 +72,6 @@ class _ViewLeadsState extends State<ViewLeads> {
     Provider.of<ConnectivityProviders>(context, listen: false).dispose();
     super.dispose();
   }
-
 
   @override
   void initState() {
@@ -124,12 +124,7 @@ class _ViewLeadsState extends State<ViewLeads> {
 
   Future<void> loadData() async {
     try {
-      await Future.wait([
-        services(),
-        sourceList(),
-        staff(),
-        getEdit()
-      ]);
+      await Future.wait([services(), sourceList(), staff(), getEdit()]);
     } catch (e) {
       // Handle any errors that occur during the loading
       print("Error loading data: $e");
@@ -149,19 +144,16 @@ class _ViewLeadsState extends State<ViewLeads> {
       //     ? "Please enter company name"
       //     : "";
       _validatePhoneNumber = _phoneNumberController.text.isEmpty ||
-          _phoneNumberController.text.length != 10 ||
-          !_phoneNumberController.text.isNotEmpty
+              _phoneNumberController.text.length != 10 ||
+              !_phoneNumberController.text.isNotEmpty
           ? "Please enter a valid phone number with exactly 10 digits"
           : "";
 
-      _validateservice =
-          serviceid==null ? "Please select service" : "";
+      _validateservice = serviceid == null ? "Please select service" : "";
       _validateleadSource =
-          leadsource_id==null  ? "Please select leadSource" : "";
-      _validatePriority =
-          selectedValue==null  ? "Please select priority" : "";
-      _validateleadOwner =
-          leadowner_id==null ? "Please enter staff" : "";
+          leadsource_id == null ? "Please select leadSource" : "";
+      _validatePriority = selectedValue == null ? "Please select priority" : "";
+      _validateleadOwner = leadowner_id == null ? "Please enter staff" : "";
       // _validateCity = _cityController.text.isEmpty
       //     ? "Please enter city"
       //     : "";
@@ -171,22 +163,17 @@ class _ViewLeadsState extends State<ViewLeads> {
       //     ? "Please enter remarks"
       //     : "";
 
-_isLoading=
-      _validateCustomer.isEmpty&&
-
-      _validatePhoneNumber.isEmpty&&
-      _validateservice.isEmpty&&
-      _validateleadSource.isEmpty&&
-      _validatePriority.isEmpty&&
-      _validateleadOwner.isEmpty&&
-      _validatePhoneNumber.isEmpty&&
-      _validateCity.isEmpty&&
-      _validateRemarks.isEmpty;
-
-
+      _isLoading = _validateCustomer.isEmpty &&
+          _validatePhoneNumber.isEmpty &&
+          _validateservice.isEmpty &&
+          _validateleadSource.isEmpty &&
+          _validatePriority.isEmpty &&
+          _validateleadOwner.isEmpty &&
+          _validatePhoneNumber.isEmpty &&
+          _validateCity.isEmpty &&
+          _validateRemarks.isEmpty;
 
       if (_isLoading) {
-
         addLead();
       }
     });
@@ -210,29 +197,29 @@ _isLoading=
     });
   }
 
-  List<LeadsEdit> leadseditdata=[];
+  List<LeadsEdit> leadseditdata = [];
   Future<void> getEdit() async {
-    var res = await Userapi.getEditData(widget.id);
+    var res = await Userapi.getEditData(widget.id,);
     setState(() {
       if (res != null) {
         if (res.leadsdata != null) {
-          if(res.status==true){
-            leadseditdata = res.leadsdata??[];
-            for(int i=0;i<leadseditdata.length;i++){
-              _DateController.text=leadseditdata[0].createdAt??"";
-              _customerController.text=leadseditdata[0].customer??"";
-              _companyController.text=leadseditdata[0].ogrinazation??"";
-              _phoneNumberController.text=leadseditdata[0].phone.toString()??"";
-              selectedValue=leadseditdata[0].label??"";
-              _priceController.text=leadseditdata[0].value.toString()??"";
-              _cityController.text=leadseditdata[0].town??"";
-              _remarksController.text=leadseditdata[0].description??"";
-
+          if (res.status == true) {
+            leadseditdata = res.leadsdata ?? [];
+            for (int i = 0; i < leadseditdata.length; i++) {
+              _DateController.text = leadseditdata[0].createdAt ?? "";
+              _customerController.text = leadseditdata[0].customer ?? "";
+              _companyController.text = leadseditdata[0].ogrinazation ?? "";
+              _phoneNumberController.text =
+                  leadseditdata[0].phone.toString() ?? "";
+              selectedValue = leadseditdata[0].label ?? "";
+              _priceController.text = leadseditdata[0].value.toString() ?? "";
+              _cityController.text = leadseditdata[0].town ?? "";
+              _remarksController.text = leadseditdata[0].description ?? "";
 
               String leadsource = leadseditdata[0].leadsource ?? "";
 
               var selectedSource = data.firstWhere(
-                    (source) => source.leadsource == leadsource,
+                (source) => source.leadsource == leadsource,
                 orElse: () => data.first,
               );
 
@@ -241,15 +228,15 @@ _isLoading=
               }
             }
             print('datalead>>${leadseditdata}');
+          } else {
+            print("No data found");
+          }
         } else {
-          print("No data found");
+          print("Failed to fetch data");
         }
-      } else {
-        print("Failed to fetch data");
       }
-    }});
+    });
   }
-
 
   List<Services> servicelist = [];
   Future<void> services() async {
@@ -268,14 +255,16 @@ _isLoading=
     });
   }
 
-  List<Staff> stafflist = [];
+  List<Staff> staffList = [];
   Future<void> staff() async {
+    leadowner_id = await PreferenceService().getInt('user_id') ?? 0;
+    print("leadowner_id:${leadowner_id}");
     var res = await Userapi.getStaff();
     setState(() {
       if (res != null) {
-        if (res.staff != null) {
-          stafflist = res.staff ?? [];
-          print("sourceList>>${stafflist}");
+        if (res.stafflist != null) {
+          staffList = res.stafflist ?? [];
+          print("sourceList>>${staffList}");
         } else {
           print("No data found");
         }
@@ -284,39 +273,39 @@ _isLoading=
       }
     });
   }
+
   Future<void> addLead() async {
     var data;
-
     try {
       if (widget.type == "Add") {
         print("add");
         data = await Userapi.addLeadData(
-          _customerController.text,
-          _companyController.text,
-          _phoneNumberController.text,
-          servicename!,
-          lead_source!,
-          selectedValue.toString(),
-         lead_owner!,
-          _priceController.text,
-          _cityController.text,
-          _remarksController.text,
-        );
+            _customerController.text,
+            _companyController.text,
+            _phoneNumberController.text,
+            servicename!,
+            lead_source!,
+            selectedValue.toString(),
+            lead_owner!,
+            _priceController.text,
+            _cityController.text,
+            _remarksController.text,
+            leadowner_id.toString());
       } else {
         print("edit");
         data = await Userapi.UpdateLead(
-          widget.id,
-          _customerController.text,
-          _companyController.text,
-          _phoneNumberController.text,
-          servicename??"",
-          lead_source??"",
-          selectedValue.toString(),
-          lead_owner??"",
-          _priceController.text,
-          _cityController.text,
-          _remarksController.text,
-        );
+            widget.id,
+            _customerController.text,
+            _companyController.text,
+            _phoneNumberController.text,
+            servicename ?? "",
+            lead_source ?? "",
+            selectedValue.toString(),
+            lead_owner ?? "",
+            _priceController.text,
+            _cityController.text,
+            _remarksController.text,
+            leadowner_id.toString());
       }
 
       setState(() {
@@ -326,7 +315,7 @@ _isLoading=
             CustomSnackBar.show(context, data.message);
             // Navigate after showing the snackbar
             Future.delayed(Duration(seconds: 1), () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) => AddLeads()));
+              Navigator.pop(context);
             });
           } else {
             CustomSnackBar.show(context, data.message);
@@ -343,51 +332,59 @@ _isLoading=
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     var w = MediaQuery.of(context).size.width;
     var h = MediaQuery.of(context).size.width;
     var connectiVityStatus = Provider.of<ConnectivityProviders>(context);
     return (connectiVityStatus.isDeviceConnected == "ConnectivityResult.wifi" ||
-        connectiVityStatus.isDeviceConnected == "ConnectivityResult.mobile")
+            connectiVityStatus.isDeviceConnected == "ConnectivityResult.mobile")
         ? Scaffold(
-      backgroundColor: const Color(0xffF3ECFB),
-      appBar: AppBar(
-        leading: Padding(
-          padding: const EdgeInsets.only(left: 20),
-          child: Image.asset(
-            "assets/Ozriit.png",
-            width: 89,
-            height:40,fit: BoxFit.fitWidth,
-
-          ),
-        ),
-        leadingWidth: 80,
-        actions: [
-          InkResponse(
-            onTap: () {
-              Navigator.push(
-                  context, MaterialPageRoute(builder: (context) => AddLeads()));
-            },
-            child: Container(
-              margin: EdgeInsets.only(right: 16),
-              padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(7),
-                color: Color(0xff007AFF),
-              ),
-              child: Text('View Leads',
-                  style: TextStyle(
-                      color: Color(0xfffffffff),
-                      fontWeight: FontWeight.w400,
-                      fontSize: 14,
-                      fontFamily: 'Inter')),
+            // backgroundColor: const Color(0xffF3ECFB),
+            appBar: AppBar(
+              backgroundColor: Color(0xff02017d),
+              leading: Padding(
+                  padding: const EdgeInsets.only(left: 20),
+                  child: Center(
+                    child: Text(
+                      'SYNK',
+                      style: TextStyle(
+                          color: Color(0xffffffff),
+                          fontWeight: FontWeight.w600,
+                          fontFamily: 'Poppins',
+                          fontSize: 24,
+                          letterSpacing: 1.2),
+                    ),
+                  )),
+              leadingWidth: 100,
+              actions: [
+                InkResponse(
+                  onTap: () {
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) => AddLeads()));
+                  },
+                  child: Container(
+                    margin: EdgeInsets.only(right: 16),
+                    padding: EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Color(0xffffffff))),
+                    child: Text('View Leads',
+                        style: TextStyle(
+                            color: Color(0xfffffffff),
+                            fontWeight: FontWeight.w400,
+                            fontSize: 14,
+                            fontFamily: 'Inter')),
+                  ),
+                )
+              ],
             ),
-          )
-        ],
-      ),
-      body:SingleChildScrollView(
+            body:_isLoading
+                ? CircularProgressIndicator(
+              color: Color(0xff02017d),
+              strokeWidth: 1,
+            )
+                : SingleChildScrollView(
               child: Container(
                 margin: EdgeInsets.all(16),
                 child: Column(
@@ -447,29 +444,27 @@ _isLoading=
                           _label(text: 'Customer Name'),
                           SizedBox(height: 4),
                           _buildTextFormField(
-                            controller: _customerController,
-                            hintText: 'Enter Customer Name',
-                            validationMessage: _validateCustomer,
-                            keyboardType: TextInputType.text
-                          ),
+                              controller: _customerController,
+                              hintText: 'Enter Customer Name',
+                              validationMessage: _validateCustomer,
+                              keyboardType: TextInputType.text),
                           _label1(text: 'Company Name'),
                           SizedBox(height: 4),
                           _buildTextFormField(
-                            controller: _companyController,
-                            hintText: 'Enter Company Name',
-                            validationMessage: _validateCompany,
-                              keyboardType: TextInputType.text
-
-                          ),
+                              controller: _companyController,
+                              hintText: 'Enter Company Name',
+                              validationMessage: _validateCompany,
+                              keyboardType: TextInputType.text),
                           _label(text: 'Phone Number'),
                           SizedBox(height: 4),
                           _buildTextFormField(
-                            controller: _phoneNumberController,
-                            hintText: ' Phone Number',
-                            validationMessage: _validatePhoneNumber,
-                              keyboardType: TextInputType.phone
-
-                          ),
+                              inputFormatters: [
+                                LengthLimitingTextInputFormatter(10),
+                              ],
+                              controller: _phoneNumberController,
+                              hintText: ' Phone Number',
+                              validationMessage: _validatePhoneNumber,
+                              keyboardType: TextInputType.phone),
                           SizedBox(height: 4),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -493,7 +488,6 @@ _isLoading=
                                               fontFamily: "Inter",
                                               color: Color(0xffAFAFAF),
                                             ),
-
                                           ),
                                         ],
                                       ),
@@ -510,20 +504,19 @@ _isLoading=
                                                 ),
                                               ))
                                           .toList(),
-
                                       value: serviceid != null && serviceid != 0
                                           ? servicelist.firstWhere(
-                                            (member) => member.pid == serviceid,
-                                        orElse: () => servicelist[0],
-                                      )
+                                              (member) =>
+                                                  member.pid == serviceid,
+                                              orElse: () => servicelist[0],
+                                            )
                                           : null,
                                       onChanged: (value) {
                                         setState(() {
                                           serviceid = value!.pid!;
                                           servicename = value!.projectName!;
-                                          _validateservice="";
+                                          _validateservice = "";
                                         });
-
                                       },
                                       buttonStyleData: ButtonStyleData(
                                         height: 35,
@@ -599,8 +592,6 @@ _isLoading=
                               SizedBox(
                                 width: w * 0.02,
                               ),
-
-
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 mainAxisAlignment: MainAxisAlignment.start,
@@ -627,22 +618,25 @@ _isLoading=
                                       // The items to display in the dropdown
                                       items: data
                                           .map((source) => DropdownMenuItem(
-                                        value: source,
-                                        child: Text(
-                                          source.leadsource ?? '',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ))
+                                                value: source,
+                                                child: Text(
+                                                  source.leadsource ?? '',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ))
                                           .toList(),
                                       // Set the value to null initially to show the hint
-                                      value: leadsource_id != null && leadsource_id != 0
+                                      value: leadsource_id != null &&
+                                              leadsource_id != 0
                                           ? data.firstWhere(
-                                            (member) => member.lsid == leadsource_id,
-                                        orElse: () => data[0],
-                                      )
+                                              (member) =>
+                                                  member.lsid == leadsource_id,
+                                              orElse: () => data[0],
+                                            )
                                           : null, // Ensure it shows the hint when no valid selection
                                       onChanged: (value) {
                                         setState(() {
@@ -655,10 +649,13 @@ _isLoading=
                                       buttonStyleData: ButtonStyleData(
                                         height: 35,
                                         width: w * 0.4,
-                                        padding: const EdgeInsets.only(left: 14, right: 14),
+                                        padding: const EdgeInsets.only(
+                                            left: 14, right: 14),
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(7),
-                                          border: Border.all(color: Color(0xffD0CBDB)),
+                                          borderRadius:
+                                              BorderRadius.circular(7),
+                                          border: Border.all(
+                                              color: Color(0xffD0CBDB)),
                                           color: Color(0xffFCFAFF),
                                         ),
                                       ),
@@ -674,18 +671,23 @@ _isLoading=
                                       dropdownStyleData: DropdownStyleData(
                                         maxHeight: 200,
                                         decoration: BoxDecoration(
-                                          borderRadius: BorderRadius.circular(14),
+                                          borderRadius:
+                                              BorderRadius.circular(14),
                                           color: Colors.white,
                                         ),
                                         scrollbarTheme: ScrollbarThemeData(
                                           radius: const Radius.circular(40),
-                                          thickness: MaterialStateProperty.all(6),
-                                          thumbVisibility: MaterialStateProperty.all(true),
+                                          thickness:
+                                              MaterialStateProperty.all(6),
+                                          thumbVisibility:
+                                              MaterialStateProperty.all(true),
                                         ),
                                       ),
-                                      menuItemStyleData: const MenuItemStyleData(
+                                      menuItemStyleData:
+                                          const MenuItemStyleData(
                                         height: 40,
-                                        padding: EdgeInsets.only(left: 14, right: 14),
+                                        padding: EdgeInsets.only(
+                                            left: 14, right: 14),
                                       ),
                                     ),
                                   ),
@@ -762,8 +764,7 @@ _isLoading=
                                       onChanged: (value) {
                                         setState(() {
                                           selectedValue = value;
-                                          _validatePriority="";
-
+                                          _validatePriority = "";
                                         });
                                       },
                                       buttonStyleData: ButtonStyleData(
@@ -862,33 +863,34 @@ _isLoading=
                                           ),
                                         ],
                                       ),
-                                      items: stafflist
+                                      items: staffList
                                           .map((staff) => DropdownMenuItem(
-                                        value: staff,
-                                        child: Text(
-                                          staff.fullname ?? '',
-                                          style: const TextStyle(
-                                            fontSize: 14,
-                                          ),
-                                          overflow:
-                                          TextOverflow.ellipsis,
-                                        ),
-                                      ))
+                                                value: staff,
+                                                child: Text(
+                                                  staff.fullname ?? '',
+                                                  style: const TextStyle(
+                                                    fontSize: 14,
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ))
                                           .toList(),
-
-                                      value: leadowner_id != null && leadowner_id != 0
-                                                ? stafflist.firstWhere(
-                                     (member) => member.uid == leadowner_id,
-                                            orElse: () => stafflist[0],
-                                      )
+                                      value: leadowner_id != null &&
+                                              leadowner_id != 0
+                                          ? staffList.firstWhere(
+                                              (member) =>
+                                                  member.uid == leadowner_id,
+                                              orElse: () => staffList[
+                                                  0], // Fallback if not found
+                                            )
                                           : null,
-
-
                                       onChanged: (value) {
                                         setState(() {
                                           leadowner_id = value!.uid!;
-                                          lead_owner = value!.fullname!;
-                                          _validateleadOwner="";
+                                          lead_owner = value.fullname ?? '';
+                                          _validateleadOwner = "";
+                                          print("lead_owner:${lead_owner}");
                                         });
                                       },
                                       buttonStyleData: ButtonStyleData(
@@ -1066,74 +1068,78 @@ _isLoading=
                 ),
               ),
             ),
-      bottomNavigationBar: Container(
-        padding: EdgeInsets.all(15),
-        decoration: BoxDecoration(color: Colors.white),
-        child: Row(
-          children: [
-            InkResponse(
-              onTap: () {
-                Navigator.pop(context);
-              },
-              child: Container(
-                height: 40,
-                width: w * 0.43,
-                decoration: BoxDecoration(
-                  color: Color(0xffF8FCFF),
-                  border: Border.all(
-                    color: Color(0xff007AFF),
-                    width: 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Center(
-                  child: Text(
-                    'Cancel',
-                    style: TextStyle(
-                      color: Color(0xff007AFF),
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
+            bottomNavigationBar: Container(
+              padding: EdgeInsets.all(15),
+              decoration: BoxDecoration(color: Colors.white),
+              child: Row(
+                children: [
+                  InkResponse(
+                    onTap: () {
+                      Navigator.pop(context);
+                    },
+                    child: Container(
+                      height: 40,
+                      width: w * 0.43,
+                      decoration: BoxDecoration(
+                        color: Color(0xffF8FCFF),
+                        border: Border.all(
+                          color: Color(0xff02017d),
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'Cancel',
+                          style: TextStyle(
+                            color: Color(0xff02017d),
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w400,
+                            fontFamily: 'Inter',
+                          ),
+                        ),
+                      ),
                     ),
                   ),
-                ),
-              ),
-            ),
-            Spacer(),
-            InkResponse(
-              onTap: () {
-                _validateFields();
-              },
-              child: Container(
-                height: 40,
-                width: w * 0.43,
-                decoration: BoxDecoration(
-                  color: Color(0xff007AFF),
-                  border: Border.all(
-                    color: Color(0xff007AFF),
-                    width: 1.0,
-                  ),
-                  borderRadius: BorderRadius.circular(7),
-                ),
-                child: Center(
-                  child:  _isLoading
-                      ? CircularProgressIndicator(color: Colors.white,strokeWidth: 1,)
-                      : Text(
-                    'Save',
-                    style: TextStyle(
-                      color: Color(0xffffffff),
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w400,
-                      fontFamily: 'Inter',
+                  Spacer(),
+                  InkResponse(
+                    onTap: () {
+                      _validateFields();
+                    },
+                    child: Container(
+                      height: 40,
+                      width: w * 0.43,
+                      decoration: BoxDecoration(
+                        color: Color(0xff02017d),
+                        border: Border.all(
+                          color: Color(0xff02017d),
+                          width: 1.0,
+                        ),
+                        borderRadius: BorderRadius.circular(7),
+                      ),
+                      child: Center(
+                        child: _isLoading
+                            ? CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 1,
+                              )
+                            : Text(
+                                'Save',
+                                style: TextStyle(
+                                  color: Color(0xffffffff),
+                                  fontSize: 16.0,
+                                  fontWeight: FontWeight.w400,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                      ),
                     ),
                   ),
-                ),
+                ],
               ),
             ),
-          ],
-        ),
-      ),
-    )        : NoInternetWidget();
+          )
+        : NoInternetWidget();
   }
 
   Widget _buildTextFormField(
@@ -1141,8 +1147,9 @@ _isLoading=
       bool obscureText = false,
       required String hintText,
       required String validationMessage,
-      required TextInputType keyboardType ,
+      required TextInputType keyboardType,
       Widget? prefixicon,
+      List<TextInputFormatter>? inputFormatters,
       Widget? suffixicon}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1150,6 +1157,7 @@ _isLoading=
         Container(
           height: MediaQuery.of(context).size.height * 0.040,
           child: TextFormField(
+            inputFormatters: inputFormatters,
             controller: controller,
             keyboardType: keyboardType,
             obscureText: obscureText,

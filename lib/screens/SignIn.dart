@@ -60,6 +60,7 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
             DateTime.now().millisecondsSinceEpoch ~/ 1000;
         int expiryTimestamp = currentTimestampInSeconds + (res?.expiresIn ?? 0);
         PreferenceService().saveString('access_token', res?.accessToken ?? '');
+        PreferenceService().saveInt('user_id', res?.userId?? 0);
         PreferenceService().saveInt('expiry_time', expiryTimestamp);
         Navigator.pushReplacement(
           context,
@@ -107,12 +108,12 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
                     width: w * 0.65,
                   ),
 
-                  Image.asset(
-                    "assets/Ozriit.png",
-                    width: 120,
-                    height: 55,
-                    fit: BoxFit.fitWidth,
-                  ),
+                  // Image.asset(
+                  //   "assets/syn",
+                  //   width: 120,
+                  //   height: 55,
+                  //   fit: BoxFit.fitWidth,
+                  // ),
                   SizedBox(
                     height: 20,
                   ),
@@ -257,8 +258,8 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
                             width: w,
                             height: 45,
                             decoration: BoxDecoration(
-                                borderRadius: BorderRadius.circular(50),
-                                color: Colors.blue),
+                                borderRadius: BorderRadius.circular(10),
+                                color: Color(0xff02017d)),
                             child: Center(
                                 child: _loading
                                     ? CircularProgressIndicator(

@@ -1,13 +1,15 @@
 class SignInModel {
   String? accessToken;
   String? tokenType;
+  int? userId;
   int? expiresIn;
 
-  SignInModel({this.accessToken, this.tokenType, this.expiresIn});
+  SignInModel({this.accessToken, this.tokenType, this.userId, this.expiresIn});
 
   SignInModel.fromJson(Map<String, dynamic> json) {
     accessToken = json['access_token'];
     tokenType = json['token_type'];
+    userId = json['user_id'];
     expiresIn = json['expires_in'];
   }
 
@@ -15,6 +17,7 @@ class SignInModel {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['access_token'] = this.accessToken;
     data['token_type'] = this.tokenType;
+    data['user_id'] = this.userId;
     data['expires_in'] = this.expiresIn;
     return data;
   }

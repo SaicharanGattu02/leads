@@ -48,13 +48,14 @@ class _SplashState extends State<Splash> {
   @override
   Widget build(BuildContext context) {
     return  Scaffold(
+      backgroundColor: Color(0xff02017d),
             body: Column(mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               Center(
                 child: Image.asset(
-                  "assets/Ozriit.png",
-                  width: 120,
+                  "assets/synk.png",
+                  width: 200,
                   height: 55,
                   fit: BoxFit.fitWidth,
                 ),

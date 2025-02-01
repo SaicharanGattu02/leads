@@ -1,43 +1,117 @@
 class GetLeadData {
   bool? status;
-  List<Leads>? leads;
+  Leads? leads;
 
   GetLeadData({this.status, this.leads});
 
   GetLeadData.fromJson(Map<String, dynamic> json) {
     status = json['status'];
-    if (json['leads'] != null) {
-      leads = <Leads>[];
-      json['leads'].forEach((v) {
-        leads!.add(new Leads.fromJson(v));
-      });
-    }
+    leads = json['leads'] != null ? new Leads.fromJson(json['leads']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['status'] = this.status;
     if (this.leads != null) {
-      data['leads'] = this.leads!.map((v) => v.toJson()).toList();
+      data['leads'] = this.leads!.toJson();
     }
     return data;
   }
 }
 
 class Leads {
+  int? currentPage;
+  List<LeadsData>? leadslist;
+  String? firstPageUrl;
+  int? from;
+  int? lastPage;
+  String? lastPageUrl;
+  List<Links>? links;
+  String? nextPageUrl;
+  String? path;
+  int? perPage;
+  String? prevPageUrl;
+  int? to;
+  int? total;
+
+  Leads(
+      {this.currentPage,
+        this.leadslist,
+        this.firstPageUrl,
+        this.from,
+        this.lastPage,
+        this.lastPageUrl,
+        this.links,
+        this.nextPageUrl,
+        this.path,
+        this.perPage,
+        this.prevPageUrl,
+        this.to,
+        this.total});
+
+  Leads.fromJson(Map<String, dynamic> json) {
+    currentPage = json['current_page'];
+    if (json['data'] != null) {
+      leadslist = <LeadsData>[];
+      json['data'].forEach((v) {
+        leadslist!.add(new LeadsData.fromJson(v));
+      });
+    }
+    firstPageUrl = json['first_page_url'];
+    from = json['from'];
+    lastPage = json['last_page'];
+    lastPageUrl = json['last_page_url'];
+    if (json['links'] != null) {
+      links = <Links>[];
+      json['links'].forEach((v) {
+        links!.add(new Links.fromJson(v));
+      });
+    }
+    nextPageUrl = json['next_page_url'];
+    path = json['path'];
+    perPage = json['per_page'];
+    prevPageUrl = json['prev_page_url'];
+    to = json['to'];
+    total = json['total'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['current_page'] = this.currentPage;
+    if (this.leadslist != null) {
+      data['data'] = this.leadslist!.map((v) => v.toJson()).toList();
+    }
+    data['first_page_url'] = this.firstPageUrl;
+    data['from'] = this.from;
+    data['last_page'] = this.lastPage;
+    data['last_page_url'] = this.lastPageUrl;
+    if (this.links != null) {
+      data['links'] = this.links!.map((v) => v.toJson()).toList();
+    }
+    data['next_page_url'] = this.nextPageUrl;
+    data['path'] = this.path;
+    data['per_page'] = this.perPage;
+    data['prev_page_url'] = this.prevPageUrl;
+    data['to'] = this.to;
+    data['total'] = this.total;
+    return data;
+  }
+}
+
+class LeadsData {
   int? leadid;
   String? customer;
   String? ogrinazation;
-  Null? contactperson;
+  String? contactperson;
   String? title;
   String? description;
   int? value;
-  Null? currency;
+  String? currency;
   String? label;
   String? owner;
   int? leadownerid;
   int? phone;
-  Null? phonetype;
+  String? phonetype;
   String? email;
   Null? emailtype;
   Null? addressline1;
@@ -65,11 +139,9 @@ class Leads {
   String? companyid;
   Null? leaddata;
   Null? dealdata;
-  String? imagepath;
-  int? uid;
-  String? fullname;
+  User? user;
 
-  Leads(
+  LeadsData(
       {this.leadid,
         this.customer,
         this.ogrinazation,
@@ -110,11 +182,9 @@ class Leads {
         this.companyid,
         this.leaddata,
         this.dealdata,
-        this.imagepath,
-        this.uid,
-        this.fullname});
+        this.user});
 
-  Leads.fromJson(Map<String, dynamic> json) {
+  LeadsData.fromJson(Map<String, dynamic> json) {
     leadid = json['leadid'];
     customer = json['customer'];
     ogrinazation = json['ogrinazation'];
@@ -155,9 +225,7 @@ class Leads {
     companyid = json['companyid'];
     leaddata = json['leaddata'];
     dealdata = json['dealdata'];
-    imagepath = json['imagepath'];
-    uid = json['uid'];
-    fullname = json['fullname'];
+    user = json['user'] != null ? new User.fromJson(json['user']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -202,9 +270,50 @@ class Leads {
     data['companyid'] = this.companyid;
     data['leaddata'] = this.leaddata;
     data['dealdata'] = this.dealdata;
-    data['imagepath'] = this.imagepath;
+    if (this.user != null) {
+      data['user'] = this.user!.toJson();
+    }
+    return data;
+  }
+}
+
+class User {
+  int? uid;
+  String? fullname;
+
+  User({this.uid, this.fullname});
+
+  User.fromJson(Map<String, dynamic> json) {
+    uid = json['uid'];
+    fullname = json['fullname'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['uid'] = this.uid;
     data['fullname'] = this.fullname;
+    return data;
+  }
+}
+
+class Links {
+  String? url;
+  String? label;
+  bool? active;
+
+  Links({this.url, this.label, this.active});
+
+  Links.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
+    label = json['label'];
+    active = json['active'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['url'] = this.url;
+    data['label'] = this.label;
+    data['active'] = this.active;
     return data;
   }
 }
