@@ -380,10 +380,12 @@ class _ViewLeadsState extends State<ViewLeads> {
               ],
             ),
             body:_isLoading
-                ? CircularProgressIndicator(
-              color: Color(0xff02017d),
-              strokeWidth: 1,
-            )
+                ? Center(
+                  child: CircularProgressIndicator(
+                                color: Color(0xff02017d),
+                                strokeWidth: 1,
+                              ),
+                )
                 : SingleChildScrollView(
               child: Container(
                 margin: EdgeInsets.all(16),
