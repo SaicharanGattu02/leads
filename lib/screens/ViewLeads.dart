@@ -84,12 +84,15 @@ class _ViewLeadsState extends State<ViewLeads> {
 
   @override
   Widget build(BuildContext context) {
+
+
     var w = MediaQuery.of(context).size.width;
     var h = MediaQuery.of(context).size.width;
     var connectiVityStatus = Provider.of<ConnectivityProviders>(context);
     return (connectiVityStatus.isDeviceConnected == "ConnectivityResult.wifi" ||
             connectiVityStatus.isDeviceConnected == "ConnectivityResult.mobile")
         ? Scaffold(
+
             // backgroundColor: const Color(0xffF3ECFB),
             appBar: AppBar(
               backgroundColor: Color(0xff02017d),
