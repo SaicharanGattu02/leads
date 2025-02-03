@@ -95,17 +95,20 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
             connectiVityStatus.isDeviceConnected == "ConnectivityResult.mobile")
         ? Scaffold(
             body: SingleChildScrollView(
-              physics: NeverScrollableScrollPhysics(),
+              physics: AlwaysScrollableScrollPhysics(),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // SizedBox(
-                  //   height: 40,
-                  // ),
+                  SizedBox(
+                    height: 50,
+                  ),
 
-                  Lottie.asset(
-                    'assets/animations/signin.json',
-                    height: h * 0.37,
-                    width: w * 0.65,
+                  Center(
+                    child: Lottie.asset(
+                      'assets/animations/signin.json',
+                      height: h * 0.37,
+                      width: w * 0.65,
+                    ),
                   ),
 
                   // Image.asset(
@@ -117,8 +120,13 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
                   SizedBox(
                     height: 20,
                   ),
-                  // Text('Sign In',style: TextStyle(color: Colors.blue,fontWeight: FontWeight.w600,fontSize: 18),),
-
+                  Padding(
+                    padding: const EdgeInsets.only(left: 22),
+                    child: Text('SignIn To Continue',style: TextStyle(color:Color(0xff02017d),fontWeight: FontWeight.w600,fontSize: 18),),
+                  ),
+                  SizedBox(
+                    height: 10,
+                  ),
                   Padding(
                     padding: EdgeInsets.symmetric(horizontal: 24),
                     child: Column(

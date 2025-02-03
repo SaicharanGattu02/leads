@@ -199,7 +199,7 @@ class _ViewLeadsState extends State<ViewLeads> {
 
   List<LeadsEdit> leadseditdata = [];
   Future<void> getEdit() async {
-    var res = await Userapi.getEditData(widget.id,);
+    var res = await Userapi.getEditData(widget.id);
     setState(() {
       if (res != null) {
         if (res.leadsdata != null) {
