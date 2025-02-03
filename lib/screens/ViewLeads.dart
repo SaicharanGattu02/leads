@@ -810,7 +810,7 @@ class _AddLeadsState extends State<AddLeads> {
                           style: TextStyle(
                             fontSize: 24.0,
                             fontWeight: FontWeight.w700,
-                            color: Colors.blue,
+                            color: Color(0xff02017d),
                           ),
                         ),
                         const SizedBox(height: 10.0),
@@ -835,7 +835,7 @@ class _AddLeadsState extends State<AddLeads> {
                                 onPressed: () => Navigator.pop(context),
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor:
-                                      Colors.blue, // Filled button color
+                                      Color(0xff02017d), // Filled button color
                                   foregroundColor: Colors.white, // Text color
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 10),
@@ -855,13 +855,12 @@ class _AddLeadsState extends State<AddLeads> {
                                   Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                          builder: (context) =>
-                                              SignInWithEmail()));
+                                          builder: (context) => SignInWithEmail()));
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: Colors.blue, // Text color
+                                  foregroundColor: Color(0xff02017d), // Text color
                                   side: BorderSide(
-                                      color: Colors.blue), // Border color
+                                      color: Color(0xff02017d)), // Border color
                                   padding: const EdgeInsets.symmetric(
                                       horizontal: 20, vertical: 10),
                                 ),
