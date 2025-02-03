@@ -28,37 +28,31 @@ Future<Map<String, String>> getheader1() async {
 
 Future<bool> CheckHeaderValidity() async {
   try {
-    String currentTimestamp = DateTime.now().millisecondsSinceEpoch.toString();
     final String? refreshToken = await PreferenceService().getString("access_token");
-    final int? expiryTimestamp = await PreferenceService().getInt("expire_time");
+    final int? expiryTimestamp = await PreferenceService().getInt("expiry_time");
+
     if (refreshToken == null || expiryTimestamp == null) {
       return false;
     }
 
-    // Parse expiry timestamp safely
-    int expiryTime = expiryTimestamp;
-    int currentTime = int.tryParse(currentTimestamp) ?? 0;
+    final int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
 
-    // If token is still valid, return true
-    if (currentTime < expiryTime) {
-      return true;
+    if (currentTime < expiryTimestamp) {
+      return true; // Token is still valid
     }
 
     // Token expired, attempt to refresh
-    var response = await Userapi.UpdateRefreshToken();
-    if (response != null && response.accessToken != null) {
-      int currentTimestampInSeconds =
-          DateTime.now().millisecondsSinceEpoch ~/ 1000;
-      int expiryTimestamp = currentTimestampInSeconds + (response.expiresIn ?? 0);
-      PreferenceService().saveString('access_token', response.accessToken?? "");
-      PreferenceService().saveInt('expire_time', expiryTimestamp);
+    final response = await Userapi.UpdateRefreshToken();
+    if (response?.accessToken != null) {
+      final int newExpiryTimestamp = currentTime + (response?.expiresIn ?? 0);
+       PreferenceService().saveString('access_token', response?.accessToken??"");
+       PreferenceService().saveInt('expiry_time', newExpiryTimestamp);
       return true;
     }
-  } catch (e) {
-    print("Error in CheckHeaderValidity: $e");
+  } catch (e, stackTrace) {
+    print("Error in checkHeaderValidity: $e\n$stackTrace");
   }
-
-  return false; // If any failure occurs
+  return false;
 }
 
 

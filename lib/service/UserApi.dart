@@ -90,22 +90,21 @@ class Userapi {
   }
 
   static Future<GetLeadEdit?> getEditData(id) async {
-    print('idd>>${id}');
-    try {
-      final headers = await getheader();
-      final url = Uri.parse("${host}/api/editleaddata/${id}'");
-      final res = await get(url, headers: headers);
-      if (res != null) {
-        print("getEditData Response:${res.body}");
-        return GetLeadEdit.fromJson(jsonDecode(res.body));
-      } else {
-        print("Null Response");
+      try {
+        final headers = await getheader();
+        final url = Uri.parse("${host}/api/editleaddata/${id}'");
+        final res = await get(url, headers: headers);
+        if (res != null) {
+          print("getEditData Response:${res.body}");
+          return GetLeadEdit.fromJson(jsonDecode(res.body));
+        } else {
+          print("Null Response");
+          return null;
+        }
+      } catch (e) {
+        debugPrint('Error: $e');
         return null;
       }
-    } catch (e) {
-      debugPrint('Error: $e');
-      return null;
-    }
   }
 
   static Future<GetStaffModel?> getStaff() async {
@@ -127,27 +126,32 @@ class Userapi {
   }
 
   static Future<GetLeadData?> getLeads(page,BuildContext context) async {
-    try {
-      final headers = await getheader();
-      final url = Uri.parse("${host}/api/getleaddata?page=${page}");
-      final res = await get(url, headers: headers);
+    if(await CheckHeaderValidity()) {
+      try {
+        final headers = await getheader();
+        final url = Uri.parse("${host}/api/getleaddata?page=${page}");
+        final res = await get(url, headers: headers);
 
-      if (res != null) {
-        final jsonResponse = jsonDecode(res.body);
-        final jsonmesage = jsonResponse['message'];
+        if (res != null) {
+          final jsonResponse = jsonDecode(res.body);
+          final jsonmesage = jsonResponse['message'];
 
-        if (jsonResponse['status'] == false) {
-          CustomSnackBar.show(context, jsonmesage ?? '');
+          if (jsonResponse['status'] == false) {
+            CustomSnackBar.show(context, jsonmesage ?? '');
+          }
+
+          print("getLeads Response:${res.body}");
+          return GetLeadData.fromJson(jsonDecode(res.body));
+        } else {
+          print("Null Response");
+          return null;
         }
-
-        print("getLeads Response:${res.body}");
-        return GetLeadData.fromJson(jsonDecode(res.body));
-      } else {
-        print("Null Response");
+      } catch (e) {
+        debugPrint('Error: $e');
         return null;
       }
-    } catch (e) {
-      debugPrint('Error: $e');
+    }else{
+      debugPrint('Error Occured');
       return null;
     }
   }
@@ -164,42 +168,45 @@ class Userapi {
       String remarks,
       String leadOwnerid,
       ) async {
-    final sessionid = await PreferenceService().getString("access_token");
-    final url = Uri.parse('${host}/api/addleaddata');
-    // final String userid= PreferenceService().getString('user_id') as String;
+    if(await CheckHeaderValidity()) {
+      try {
+      final sessionid = await PreferenceService().getString("access_token");
+      final url = Uri.parse('${host}/api/addleaddata');
+      // final String userid= PreferenceService().getString('user_id') as String;
 
-    var request = http.MultipartRequest('POST', url)
-    // ..fields['created_at'] = date
-      ..headers['Authorization'] = 'Bearer ${sessionid}'
-      ..fields['customer'] = customerName
-      ..fields['Orginazation'] = companyName // Make sure this is correct
-      ..fields['Title'] = service
-      ..fields['Description'] = remarks
-      ..fields['mobile'] = phoneNumber
-      ..fields['email'] =
-          "sk.asif0490@gmail.com" // Ensure it's properly formatted
-      ..fields['leadsource'] = leadSource
-      ..fields['city'] = city
-      ..fields['Priotity'] = priority
-      ..fields['leadOwnerid'] =leadOwnerid
-      ..fields['amount'] = price;
+      var request = http.MultipartRequest('POST', url)
+      // ..fields['created_at'] = date
+        ..headers['Authorization'] = 'Bearer ${sessionid}'
+        ..fields['customer'] = customerName
+        ..fields['Orginazation'] = companyName
+        ..fields['Title'] = service
+        ..fields['Description'] = remarks
+        ..fields['mobile'] = phoneNumber
+        ..fields['email'] = "sk.asif0490@gmail.com"
+        ..fields['leadsource'] = leadSource
+        ..fields['city'] = city
+        ..fields['Priotity'] = priority
+        ..fields['leadOwnerid'] = leadOwnerid
+        ..fields['amount'] = price;
 
-    print("request fields:${request.fields}");
+      print("request fields:${request.fields}");
+        final response = await request.send();
 
-    try {
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        final responseString = await response.stream.bytesToString();
-        print('addLead Response: $responseString');
-        return LeadData.fromJson(jsonDecode(responseString));
-      } else {
-        final responseString = await response.stream.bytesToString();
-        print('Error: ${response.statusCode}, Message: $responseString');
+        if (response.statusCode == 200) {
+          final responseString = await response.stream.bytesToString();
+          print('addLead Response: $responseString');
+          return LeadData.fromJson(jsonDecode(responseString));
+        } else {
+          final responseString = await response.stream.bytesToString();
+          print('Error: ${response.statusCode}, Message: $responseString');
+          return null;
+        }
+      } catch (e) {
+        print('Exception: $e');
         return null;
       }
-    } catch (e) {
-      print('Exception: $e');
+    }else{
+      print('Error Occured');
       return null;
     }
   }
@@ -215,53 +222,42 @@ class Userapi {
       String price,
       String city,
       String remarks, String leadOwnerid,) async {
-    final sessionid = await PreferenceService().getString("access_token");
-    final url = Uri.parse('${host}/api/update_lead/${id}');
+    if(await CheckHeaderValidity()) {
+      try {
+        final sessionid = await PreferenceService().getString("access_token");
+        final url = Uri.parse('${host}/api/update_lead/${id}');
 
-    var request = http.MultipartRequest('POST', url)
+        var request = http.MultipartRequest('POST', url)
+          ..headers['Authorization'] = 'Bearer ${sessionid}'
+          ..fields['customer'] = customerName
+          ..fields['Orginazation'] = companyName // Make sure this is correct
+          ..fields['Title'] = service
+          ..fields['Description'] = remarks
+          ..fields['mobile'] = phoneNumber
+          ..fields['email'] = "sk.asif0490@gmail.com" // Ensure it's properly formatted
+          ..fields['leadsource'] = leadSource
+          ..fields['city'] = city
+          ..fields['Priotity'] = priority
+          ..fields['leadOwnerid'] = leadOwnerid
+          ..fields['amount'] = price;
 
-    // ..fields['created_at'] = date
-    //   ..headers['Authorization'] = 'Bearer ${sessionid}'
-    //   ..fields['customer'] = customerName
-    //   ..fields['Orginazation'] = companyName // Make sure this is correct
-    //   ..fields['Title'] = service
-    //   ..fields['Description'] = remarks
-    //   ..fields['mobile'] = phoneNumber
-    //   ..fields['email'] =
-    //       "sk.asif0490@gmail.com" // Ensure it's properly formatted
-    //   ..fields['leadsource'] = leadSource
-    //   ..fields['city'] = city
-    //   ..fields['Priotity'] = priority
-    //   ..fields['leadOwnerid'] = leadOwnerid
-    //   ..fields['amount'] = price;
-      ..headers['Authorization'] = 'Bearer ${sessionid}'
-      ..fields['customer'] = customerName
-      ..fields['Orginazation'] = companyName // Make sure this is correct
-      ..fields['Title'] = service
-      ..fields['Description'] = remarks
-      ..fields['mobile'] = phoneNumber
-      ..fields['email'] =
-          "sk.asif0490@gmail.com" // Ensure it's properly formatted
-      ..fields['leadsource'] = leadSource
-      ..fields['city'] = city
-      ..fields['Priotity'] = priority
-      ..fields['leadOwnerid'] =leadOwnerid
-      ..fields['amount'] = price;
-
-    print("request fields:${request.fields}");
-    try {
-      final response = await request.send();
-
-      if (response.statusCode == 200) {
-        final responseString = await response.stream.bytesToString();
-        print('addLead Response: $responseString');
-        return LeadData.fromJson(jsonDecode(responseString));
-      } else {
-        print('Error: ${response.statusCode}');
+        print("request fields:${request.fields}");
+        final response = await request.send();
+        if (response.statusCode == 200) {
+          final responseString = await response.stream.bytesToString();
+          print('addLead Response: $responseString');
+          return LeadData.fromJson(jsonDecode(responseString));
+        } else {
+          print('Error: ${response.statusCode}');
+          return null;
+        }
+      } catch (e) {
+        print('Exception: $e');
         return null;
       }
-    } catch (e) {
-      print('Exception: $e');
+    }else{
+      print('Error Occured');
+      return null;
     }
   }
 
@@ -269,7 +265,7 @@ class Userapi {
     try {
       final url = Uri.parse("${host}/api/refresh");
       final headers = await getheader();
-      final response = await http.post(
+      final response = await http.get(
         url,
         headers: headers,
       );
@@ -282,7 +278,7 @@ class Userapi {
         return null;
       }
     } catch (e) {
-      print("Error occurred: $e");
+      print("Error occurred UpdateRefreshToken: $e");
       return null;
     }
   }

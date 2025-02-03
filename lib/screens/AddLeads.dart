@@ -3,31 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 import 'package:leads/Providers/ConnectivityProviders.dart';
-import 'package:leads/model/LoginModel.dart';
 import 'package:leads/screens/NoInterNet.dart';
 import 'package:leads/service/CustomSnackBar.dart';
 import 'package:provider/provider.dart';
-
 import '../model/GetLeadEdit.dart';
 import '../model/GetStaffModel.dart';
 import '../model/ServiceModel.dart';
 import '../model/SourceModel.dart';
-
 import '../service/Preferances.dart';
 import '../service/UserApi.dart';
+import '../service/otherservices.dart';
 import 'ViewLeads.dart';
 import 'ShakeWidget.dart';
 
-class ViewLeads extends StatefulWidget {
+class AddLeads extends StatefulWidget {
   final String id;
   final String type;
-  ViewLeads({super.key, required this.id, required this.type});
+  AddLeads({super.key, required this.id, required this.type});
 
   @override
-  State<ViewLeads> createState() => _ViewLeadsState();
+  State<AddLeads> createState() => _AddLeadsState();
 }
 
-class _ViewLeadsState extends State<ViewLeads> {
+class _AddLeadsState extends State<AddLeads> {
   final TextEditingController _DateController = TextEditingController();
   final TextEditingController _remarksController = TextEditingController();
   final TextEditingController _customerController = TextEditingController();
@@ -55,6 +53,7 @@ class _ViewLeadsState extends State<ViewLeads> {
 
   String? selectedValue;
   bool _isLoading = true;
+  bool _isSaving = false;
   int? serviceid;
   String? servicename;
   String? lead_source;
@@ -118,16 +117,19 @@ class _ViewLeadsState extends State<ViewLeads> {
         _validateRemarks = "";
       });
     });
-
     loadData();
   }
 
   Future<void> loadData() async {
     try {
-      await Future.wait([services(), sourceList(), staff(), getEdit()]);
-    } catch (e) {
-      // Handle any errors that occur during the loading
-      print("Error loading data: $e");
+      bool isTokenValid = await CheckHeaderValidity();
+      if (!isTokenValid) {
+        print("Token refresh failed. Stopping API calls.");
+        return;
+      }
+      await Future.wait([services(), sourceList(), staff(),getEdit()]);
+    } catch (e, stackTrace) {
+      print("Error loading data: $e\n$stackTrace");
     } finally {
       setState(() {
         _isLoading = false;
@@ -135,8 +137,10 @@ class _ViewLeadsState extends State<ViewLeads> {
     }
   }
 
+
   void _validateFields() {
     setState(() {
+      _isSaving = true;
       // _validateDate = _DateController.text.isEmpty ? "Please select date" : "";
       _validateCustomer =
           _customerController.text.isEmpty ? "Please enter customer name" : "";
@@ -163,7 +167,7 @@ class _ViewLeadsState extends State<ViewLeads> {
       //     ? "Please enter remarks"
       //     : "";
 
-      _isLoading = _validateCustomer.isEmpty &&
+     if(_validateCustomer.isEmpty &&
           _validatePhoneNumber.isEmpty &&
           _validateservice.isEmpty &&
           _validateleadSource.isEmpty &&
@@ -171,10 +175,10 @@ class _ViewLeadsState extends State<ViewLeads> {
           _validateleadOwner.isEmpty &&
           _validatePhoneNumber.isEmpty &&
           _validateCity.isEmpty &&
-          _validateRemarks.isEmpty;
-
-      if (_isLoading) {
-        addLead();
+          _validateRemarks.isEmpty){
+       addLead();
+      }else{
+        _isSaving = false;
       }
     });
   }
@@ -307,27 +311,24 @@ class _ViewLeadsState extends State<ViewLeads> {
             _remarksController.text,
             leadowner_id.toString());
       }
-
       setState(() {
-        _isLoading = false;
         if (data != null) {
-          if (data.status == true) {
-            CustomSnackBar.show(context, data.message);
-            // Navigate after showing the snackbar
-            Future.delayed(Duration(seconds: 1), () {
-              Navigator.pop(context);
-            });
-          } else {
-            CustomSnackBar.show(context, data.message);
-          }
-        } else {
-          _isLoading = false;
+          setState(() {
+            if (data.status == true) {
+              Navigator.pop(context,true);
+              CustomSnackBar.show(context, data.message);
+              _isSaving = false;
+            } else {
+              _isSaving = false;
+              CustomSnackBar.show(context, data.message);
+            }
+          });
         }
       });
     } catch (e) {
       CustomSnackBar.show(context, "An error occurred: $e");
       setState(() {
-        _isLoading = false;
+        _isSaving = false;
       });
     }
   }
@@ -360,8 +361,7 @@ class _ViewLeadsState extends State<ViewLeads> {
               actions: [
                 InkResponse(
                   onTap: () {
-                    Navigator.push(context,
-                        MaterialPageRoute(builder: (context) => AddLeads()));
+                    Navigator.pop(context,true);
                   },
                   child: Container(
                     margin: EdgeInsets.only(right: 16),
@@ -1077,7 +1077,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                 children: [
                   InkResponse(
                     onTap: () {
-                      Navigator.pop(context);
+                      Navigator.pop(context,true);
                     },
                     child: Container(
                       height: 40,
@@ -1106,7 +1106,12 @@ class _ViewLeadsState extends State<ViewLeads> {
                   Spacer(),
                   InkResponse(
                     onTap: () {
-                      _validateFields();
+                      if(_isSaving){
+
+                      }else{
+                        _validateFields();
+                      }
+
                     },
                     child: Container(
                       height: 40,
@@ -1120,7 +1125,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                         borderRadius: BorderRadius.circular(7),
                       ),
                       child: Center(
-                        child: _isLoading
+                        child: _isSaving
                             ? CircularProgressIndicator(
                                 color: Colors.white,
                                 strokeWidth: 1,

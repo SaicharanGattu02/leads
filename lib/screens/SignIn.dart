@@ -40,38 +40,37 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
           : "";
 
       if (validateEmail.isEmpty && validatePassword.isEmpty) {
-        LoginWithEmail();
+        loginWithEmail();
       } else {
         _loading = false;
       }
     });
   }
 
-  Future<void> LoginWithEmail() async {
-    setState(() {
-      _loading = true;
-    });
-    var res = await Userapi.SignIn(
-        _emailController.text, _passwordController.text, context);
-    setState(() {
-      _loading = false;
-      if (res?.accessToken != null) {
-        int currentTimestampInSeconds =
-            DateTime.now().millisecondsSinceEpoch ~/ 1000;
-        int expiryTimestamp = currentTimestampInSeconds + (res?.expiresIn ?? 0);
-        PreferenceService().saveString('access_token', res?.accessToken ?? '');
-        PreferenceService().saveInt('user_id', res?.userId?? 0);
-        PreferenceService().saveInt('expiry_time', expiryTimestamp);
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => AddLeads()),
-        );
+  Future<void> loginWithEmail() async {
+    setState(() => _loading = true);
+    try {
+      final response = await Userapi.SignIn(_emailController.text, _passwordController.text, context);
+
+      if (response?.accessToken != null) {
+        final int currentTime = DateTime.now().millisecondsSinceEpoch ~/ 1000;
+        final int expiryTimestamp = currentTime + (response?.expiresIn ?? 0);
+
+         PreferenceService().saveString('access_token', response?.accessToken??"");
+         PreferenceService().saveInt('user_id', response?.userId ?? 0);
+         PreferenceService().saveInt('expiry_time', expiryTimestamp);
+
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => ViewLeads()));
       } else {
-        // Handle error or failure to sign in (if needed)
-        print("Login failed or access token is empty");
+        print("Login failed: Access token is empty");
       }
-    });
+    } catch (e, stackTrace) {
+      print("Error in loginWithEmail: $e\n$stackTrace");
+    } finally {
+      setState(() => _loading = false);
+    }
   }
+
 
   @override
   void initState() {

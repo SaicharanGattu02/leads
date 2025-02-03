@@ -39,7 +39,7 @@ class _SplashState extends State<Splash> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) {
-          return (token!='') ? AddLeads() : SignInWithEmail();
+          return (token!='') ? ViewLeads() : SignInWithEmail();
         }),
       );
     });

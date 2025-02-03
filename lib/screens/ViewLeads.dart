@@ -14,14 +14,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../model/GetLeadModel.dart';
 import 'AddLeads.dart';
 
-class AddLeads extends StatefulWidget {
-  const AddLeads({super.key});
-
+class ViewLeads extends StatefulWidget {
+  const ViewLeads({super.key});
   @override
-  State<AddLeads> createState() => _AddLeadsState();
+  State<ViewLeads> createState() => _ViewLeadsState();
 }
 
-class _AddLeadsState extends State<AddLeads> {
+class _ViewLeadsState extends State<ViewLeads> {
   final List<String> items = [
     'Internal',
     'External',
@@ -122,12 +121,16 @@ class _AddLeadsState extends State<AddLeads> {
                   width: 10,
                 ),
                 InkResponse(
-                  onTap: () {
-                    Navigator.push(
+                  onTap: () async {
+                    var res = await Navigator.push(
                         context,
                         MaterialPageRoute(
                             builder: (context) =>
-                                ViewLeads(id: '', type: 'Add')));
+                                AddLeads(id: '', type: 'Add')));
+                    print("Response from AddLeads: $res");
+                    if (res == true) {
+                      Provider.of<ViewLeadsProviders>(context, listen: false).getLeadsData(context);
+                    }
                   },
                   child: Container(
                     margin: EdgeInsets.only(right: 16),
@@ -321,7 +324,7 @@ class _AddLeadsState extends State<AddLeads> {
                                                                         context,
                                                                         MaterialPageRoute(
                                                                             builder: (context) =>
-                                                                                ViewLeads(id: lead.leadid.toString() ?? "", type: 'Edit')));
+                                                                                AddLeads(id: lead.leadid.toString() ?? "", type: 'Edit')));
                                                                   },
                                                                   child:
                                                                       Container(
