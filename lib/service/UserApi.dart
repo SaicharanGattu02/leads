@@ -159,6 +159,7 @@ class Userapi {
   static Future<LeadData?> addLeadData(String customerName,
       String companyName,
       String phoneNumber,
+      String email,
       String service,
       String leadSource,
       String priority,
@@ -182,7 +183,7 @@ class Userapi {
         ..fields['Title'] = service
         ..fields['Description'] = remarks
         ..fields['mobile'] = phoneNumber
-        ..fields['email'] = "sk.asif0490@gmail.com"
+        ..fields['email'] = email
         ..fields['leadsource'] = leadSource
         ..fields['city'] = city
         ..fields['Priotity'] = priority
@@ -215,6 +216,7 @@ class Userapi {
       String customerName,
       String companyName,
       String phoneNumber,
+      String email,
       String service,
       String leadSource,
       String priority,
@@ -234,7 +236,7 @@ class Userapi {
           ..fields['Title'] = service
           ..fields['Description'] = remarks
           ..fields['mobile'] = phoneNumber
-          ..fields['email'] = "sk.asif0490@gmail.com" // Ensure it's properly formatted
+          ..fields['email'] = email
           ..fields['leadsource'] = leadSource
           ..fields['city'] = city
           ..fields['Priotity'] = priority

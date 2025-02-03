@@ -37,6 +37,7 @@ class _AddLeadsState extends State<AddLeads> {
   final TextEditingController _laedOwnerController = TextEditingController();
   final TextEditingController _priceController = TextEditingController();
   final TextEditingController _cityController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
 
   String _validateDate = "";
   String _validateRemarks = "";
@@ -44,6 +45,7 @@ class _AddLeadsState extends State<AddLeads> {
 
   String _validateCompany = "";
   String _validatePhoneNumber = "";
+  String _validateemail = "";
   String _validateservice = "";
   String _validateleadSource = "";
   String _validatePriority = "";
@@ -90,6 +92,11 @@ class _AddLeadsState extends State<AddLeads> {
     _phoneNumberController.addListener(() {
       setState(() {
         _validatePhoneNumber = "";
+      });
+    });
+    _emailController.addListener(() {
+      setState(() {
+        _validateemail = "";
       });
     });
     _serviceController.addListener(() {
@@ -149,10 +156,14 @@ class _AddLeadsState extends State<AddLeads> {
       //     : "";
       _validatePhoneNumber = _phoneNumberController.text.isEmpty ||
               _phoneNumberController.text.length != 10 ||
-              !_phoneNumberController.text.isNotEmpty
+              _phoneNumberController.text.isEmpty
           ? "Please enter a valid phone number with exactly 10 digits"
           : "";
-
+      _validateemail = _emailController.text.isEmpty ||
+          !RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+              .hasMatch(_emailController.text)
+          ? "Please enter a valid email"
+          : "";
       _validateservice = serviceid == null ? "Please select service" : "";
       _validateleadSource =
           leadsource_id == null ? "Please select leadSource" : "";
@@ -175,6 +186,7 @@ class _AddLeadsState extends State<AddLeads> {
           _validateleadOwner.isEmpty &&
           _validatePhoneNumber.isEmpty &&
           _validateCity.isEmpty &&
+         _validateemail.isEmpty &&
           _validateRemarks.isEmpty){
        addLead();
       }else{
@@ -213,8 +225,8 @@ class _AddLeadsState extends State<AddLeads> {
               _DateController.text = leadseditdata[0].createdAt ?? "";
               _customerController.text = leadseditdata[0].customer ?? "";
               _companyController.text = leadseditdata[0].ogrinazation ?? "";
-              _phoneNumberController.text =
-                  leadseditdata[0].phone.toString() ?? "";
+              _phoneNumberController.text = leadseditdata[0].phone.toString() ?? "";
+              _emailController.text = leadseditdata[0].email??'';
               selectedValue = leadseditdata[0].label ?? "";
               _priceController.text = leadseditdata[0].value.toString() ?? "";
               _cityController.text = leadseditdata[0].town ?? "";
@@ -287,6 +299,7 @@ class _AddLeadsState extends State<AddLeads> {
             _customerController.text,
             _companyController.text,
             _phoneNumberController.text,
+            _emailController.text,
             servicename!,
             lead_source!,
             selectedValue.toString(),
@@ -302,6 +315,7 @@ class _AddLeadsState extends State<AddLeads> {
             _customerController.text,
             _companyController.text,
             _phoneNumberController.text,
+            _emailController.text,
             servicename ?? "",
             lead_source ?? "",
             selectedValue.toString(),
@@ -467,6 +481,13 @@ class _AddLeadsState extends State<AddLeads> {
                               hintText: ' Phone Number',
                               validationMessage: _validatePhoneNumber,
                               keyboardType: TextInputType.phone),
+                          _label(text: 'Email ID'),
+                          SizedBox(height: 4),
+                          _buildTextFormField(
+                              controller: _emailController,
+                              hintText: 'Enter Email',
+                              validationMessage: _validateemail,
+                              keyboardType: TextInputType.emailAddress),
                           SizedBox(height: 4),
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.start,
@@ -1162,7 +1183,7 @@ class _AddLeadsState extends State<AddLeads> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: MediaQuery.of(context).size.height * 0.040,
+          height: MediaQuery.of(context).size.height * 0.050,
           child: TextFormField(
             inputFormatters: inputFormatters,
             controller: controller,
@@ -1217,7 +1238,7 @@ class _AddLeadsState extends State<AddLeads> {
           Container(
             alignment: Alignment.topLeft,
             margin: EdgeInsets.only(left: 8, bottom: 10, top: 5),
-            width: MediaQuery.of(context).size.width * 0.6,
+            width: MediaQuery.of(context).size.width * 0.8,
             child: ShakeWidget(
               key: Key("value"),
               duration: Duration(milliseconds: 700),
@@ -1333,7 +1354,7 @@ class _AddLeadsState extends State<AddLeads> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: MediaQuery.of(context).size.height * 0.04,
+          height: MediaQuery.of(context).size.height * 0.050,
           child: TextField(
             controller: controller,
             readOnly: true,
