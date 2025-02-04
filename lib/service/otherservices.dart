@@ -28,7 +28,7 @@ Future<Map<String, String>> getheader1() async {
 
 Future<bool> CheckHeaderValidity() async {
   try {
-    final String? refreshToken = await PreferenceService().getString("access_token");
+    final String? refreshToken = await PreferenceService().getString("refresh_token");
     final int? expiryTimestamp = await PreferenceService().getInt("expiry_time");
 
     if (refreshToken == null || expiryTimestamp == null) {
@@ -42,7 +42,7 @@ Future<bool> CheckHeaderValidity() async {
     }
 
     // Token expired, attempt to refresh
-    final response = await Userapi.UpdateRefreshToken();
+    final response = await Userapi.UpdateRefreshToken(refreshToken);
     if (response?.accessToken != null) {
       final int newExpiryTimestamp = currentTime + (response?.expiresIn ?? 0);
        PreferenceService().saveString('access_token', response?.accessToken??"");

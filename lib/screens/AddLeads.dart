@@ -140,8 +140,9 @@ class _AddLeadsState extends State<AddLeads> {
       await Future.wait([services(), sourceList(), staff()]);
 
       // After these three are done, then call getEdit().
-      await getEdit();
-
+      if(widget.type!="Add"){
+        await getEdit();
+      }
     } catch (e, stackTrace) {
       print("Error loading data: $e\n$stackTrace");
     } finally {
@@ -150,8 +151,6 @@ class _AddLeadsState extends State<AddLeads> {
       });
     }
   }
-
-
 
   void _validateFields() {
     setState(() {
@@ -168,8 +167,8 @@ class _AddLeadsState extends State<AddLeads> {
           ? "Please enter a valid phone number with exactly 10 digits"
           : "";
       _validateemail = _emailController.text.isEmpty ||
-          !RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
-              .hasMatch(_emailController.text)
+              !RegExp(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+                  .hasMatch(_emailController.text)
           ? "Please enter a valid email"
           : "";
       _validateservice = serviceid == null ? "Please select service" : "";
@@ -186,7 +185,7 @@ class _AddLeadsState extends State<AddLeads> {
       //     ? "Please enter remarks"
       //     : "";
 
-     if(_validateCustomer.isEmpty &&
+      if (_validateCustomer.isEmpty &&
           _validatePhoneNumber.isEmpty &&
           _validateservice.isEmpty &&
           _validateleadSource.isEmpty &&
@@ -194,10 +193,10 @@ class _AddLeadsState extends State<AddLeads> {
           _validateleadOwner.isEmpty &&
           _validatePhoneNumber.isEmpty &&
           _validateCity.isEmpty &&
-         _validateemail.isEmpty &&
-          _validateRemarks.isEmpty){
-       addLead();
-      }else{
+          _validateemail.isEmpty &&
+          _validateRemarks.isEmpty) {
+        addLead();
+      } else {
         _isSaving = false;
       }
     });
@@ -206,7 +205,7 @@ class _AddLeadsState extends State<AddLeads> {
   List<Data> data = [];
 
   Future<void> sourceList() async {
-    var res = await Userapi.GetSource();
+    var res = await Userapi.GetSource(context);
     setState(() {
       if (res != null) {
         if (res.data != null) {
@@ -223,7 +222,7 @@ class _AddLeadsState extends State<AddLeads> {
 
   List<LeadsEdit> leadseditdata = [];
   Future<void> getEdit() async {
-    var res = await Userapi.getEditData(widget.id);
+    var res = await Userapi.getEditData(widget.id,context);
     setState(() {
       if (res != null) {
         if (res.leadsdata != null) {
@@ -233,16 +232,19 @@ class _AddLeadsState extends State<AddLeads> {
               _DateController.text = leadseditdata[0].createdAt ?? "";
               _customerController.text = leadseditdata[0].customer ?? "";
               _companyController.text = leadseditdata[0].ogrinazation ?? "";
-              _phoneNumberController.text = leadseditdata[0].phone.toString() ?? "";
-              _emailController.text = leadseditdata[0].email??'';
+              _phoneNumberController.text =
+                  leadseditdata[0].phone.toString() ?? "";
+              _emailController.text = leadseditdata[0].email ?? '';
               selectedValue = leadseditdata[0].label ?? "";
               _priceController.text = leadseditdata[0].value.toString() ?? "";
               _cityController.text = leadseditdata[0].town ?? "";
               _remarksController.text = leadseditdata[0].description ?? "";
-              String leadsource = leadseditdata[0].leadSourceName?[0].leadsource??"";
+              String leadsource =
+                  leadseditdata[0].leadSourceName?[0].leadsource ?? "";
 
-              String serviceName = leadseditdata[0].titleName?[0].projectName??"";
-              String leadowner = leadseditdata[0].owner??"";
+              String serviceName =
+                  leadseditdata[0].titleName?[0].projectName ?? "";
+              String leadowner = leadseditdata[0].owner ?? "";
 
               var selectedSource = data.firstWhere(
                 (source) => source.leadsource == leadsource,
@@ -250,15 +252,14 @@ class _AddLeadsState extends State<AddLeads> {
               );
 
               var selectedOwner = staffList.firstWhere(
-                    (source) => source.fullname == leadowner,
+                (source) => source.fullname == leadowner,
                 orElse: () => staffList.first,
               );
 
               var selectedService = servicelist.firstWhere(
-                    (source) => source.projectName == serviceName,
+                (source) => source.projectName == serviceName,
                 orElse: () => servicelist.first,
               );
-
 
               if (selectedSource != null) {
                 leadsource_id = selectedSource.lsid;
@@ -268,10 +269,8 @@ class _AddLeadsState extends State<AddLeads> {
               }
 
               if (selectedOwner != null) {
-                leadowner_id = selectedOwner.uid??0;
+                leadowner_id = selectedOwner.uid ?? 0;
               }
-
-
             }
             print('datalead>>${leadseditdata}');
           } else {
@@ -286,7 +285,7 @@ class _AddLeadsState extends State<AddLeads> {
 
   List<Services> servicelist = [];
   Future<void> services() async {
-    var res = await Userapi.getService();
+    var res = await Userapi.getService(context);
     setState(() {
       if (res != null) {
         if (res.service != null) {
@@ -303,9 +302,9 @@ class _AddLeadsState extends State<AddLeads> {
 
   List<Staff> staffList = [];
   Future<void> staff() async {
-      leadowner_id = await PreferenceService().getInt('user_id') ?? 0;
-      print("leadowner_id:${leadowner_id}");
-    var res = await Userapi.getStaff();
+    leadowner_id = await PreferenceService().getInt('user_id') ?? 0;
+    print("leadowner_id:${leadowner_id}");
+    var res = await Userapi.getStaff(context);
     setState(() {
       if (res != null) {
         if (res.stafflist != null) {
@@ -333,11 +332,10 @@ class _AddLeadsState extends State<AddLeads> {
             serviceid.toString(),
             leadsource_id.toString(),
             selectedValue.toString(),
-            lead_owner!,
             _priceController.text,
             _cityController.text,
             _remarksController.text,
-            leadowner_id.toString());
+            leadowner_id.toString(),context);
       } else {
         print("edit");
         data = await Userapi.UpdateLead(
@@ -349,17 +347,16 @@ class _AddLeadsState extends State<AddLeads> {
             serviceid.toString(),
             leadsource_id.toString(),
             selectedValue.toString(),
-            lead_owner ?? "",
             _priceController.text,
             _cityController.text,
             _remarksController.text,
-            leadowner_id.toString());
+            leadowner_id.toString(),context);
       }
       setState(() {
         if (data != null) {
           setState(() {
             if (data.status == true) {
-              Navigator.pop(context,true);
+              Navigator.pop(context, true);
               CustomSnackBar.show(context, data.message);
               _isSaving = false;
             } else {
@@ -405,7 +402,7 @@ class _AddLeadsState extends State<AddLeads> {
               actions: [
                 InkResponse(
                   onTap: () {
-                    Navigator.pop(context,true);
+                    Navigator.pop(context, true);
                   },
                   child: Container(
                     margin: EdgeInsets.only(right: 16),
@@ -423,706 +420,759 @@ class _AddLeadsState extends State<AddLeads> {
                 )
               ],
             ),
-            body:_isLoading
+            body: _isLoading
                 ? Center(
-                  child: CircularProgressIndicator(
-                                color: Color(0xff02017d),
-                                strokeWidth: 1,
-                              ),
-                )
+                    child: CircularProgressIndicator(
+                      color: Color(0xff02017d),
+                    ),
+                  )
                 : SingleChildScrollView(
-              child: Container(
-                margin: EdgeInsets.all(16),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: Color(0xffffffff),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                    child: Container(
+                      margin: EdgeInsets.all(16),
                       child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.start,
                         children: [
-                          Row(
-                            children: [
-                              Text(
-                                '${widget.type} Leads',
-                                style: TextStyle(
-                                  fontFamily: 'Inter',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.w500,
-                                  height: 21.78 / 16,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 5),
-                          _label(text: 'Lead Date'),
-                          SizedBox(height: 4),
-                          _buildDateField(
-                            _DateController,
-                          ),
-                          if (_validateDate.isNotEmpty) ...[
-                            Container(
-                              alignment: Alignment.topLeft,
-                              margin: EdgeInsets.only(bottom: 5),
-                              child: ShakeWidget(
-                                key: Key("value"),
-                                duration: Duration(milliseconds: 700),
-                                child: Text(
-                                  _validateDate,
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 12,
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ] else ...[
-                            const SizedBox(
-                              height: 12,
-                            ),
-                          ],
-                          _label(text: 'Customer Name'),
-                          SizedBox(height: 4),
-                          _buildTextFormField(
-                              controller: _customerController,
-                              hintText: 'Enter Customer Name',
-                              validationMessage: _validateCustomer,
-                              keyboardType: TextInputType.text),
-                          _label1(text: 'Company Name'),
-                          SizedBox(height: 4),
-                          _buildTextFormField(
-                              controller: _companyController,
-                              hintText: 'Enter Company Name',
-                              validationMessage: _validateCompany,
-                              keyboardType: TextInputType.text),
-                          _label(text: 'Phone Number'),
-                          SizedBox(height: 4),
-                          _buildTextFormField(
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(10),
-                              ],
-                              controller: _phoneNumberController,
-                              hintText: ' Phone Number',
-                              validationMessage: _validatePhoneNumber,
-                              keyboardType: TextInputType.phone),
-                          _label(text: 'Email ID'),
-                          SizedBox(height: 4),
-                          _buildTextFormField(
-                              controller: _emailController,
-                              hintText: 'Enter Email',
-                              validationMessage: _validateemail,
-                              keyboardType: TextInputType.emailAddress),
-                          SizedBox(height: 4),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  _label(text: 'Service Required'),
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton2<Services>(
-                                      isExpanded: true,
-                                      hint: const Row(
-                                        children: [
-                                          Text(
-                                            'Select service',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Inter",
-                                              color: Color(0xffAFAFAF),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      items: servicelist
-                                          .map((service) => DropdownMenuItem(
-                                                value: service,
-                                                child: Text(
-                                                  service.projectName ?? '',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ))
-                                          .toList(),
-                                      value: serviceid != null && serviceid != 0
-                                          ? servicelist.firstWhere(
-                                              (member) =>
-                                                  member.pid == serviceid,
-                                              orElse: () => servicelist[0],
-                                            )
-                                          : null,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          serviceid = value!.pid!;
-                                          servicename = value!.projectName!;
-                                          _validateservice = "";
-                                        });
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 35,
-                                        width: w * 0.4,
-                                        padding: const EdgeInsets.only(
-                                            left: 14, right: 14),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                          border: Border.all(
-                                            color: Color(0xffD0CBDB),
-                                          ),
-                                          color: Color(0xffFCFAFF),
-                                        ),
-                                      ),
-                                      iconStyleData: const IconStyleData(
-                                        icon: Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 25,
-                                        ),
-                                        iconSize: 14,
-                                        iconEnabledColor: Colors.black,
-                                        iconDisabledColor: Colors.black,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                          color: Colors.white,
-                                        ),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(40),
-                                          thickness:
-                                              MaterialStateProperty.all(6),
-                                          thumbVisibility:
-                                              MaterialStateProperty.all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData:
-                                          const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 14, right: 14),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_validateservice.isNotEmpty) ...[
-                                    Container(
-                                      alignment: Alignment.topLeft,
-                                      margin: EdgeInsets.only(bottom: 5),
-                                      child: ShakeWidget(
-                                        key: Key("value"),
-                                        duration: Duration(milliseconds: 700),
-                                        child: Text(
-                                          _validateservice,
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 12,
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ] else ...[
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              SizedBox(
-                                width: w * 0.02,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  _label(text: 'Lead source'),
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton2<Data>(
-                                      isExpanded: true,
-                                      // The hint is shown when no value is selected
-                                      hint: const Row(
-                                        children: [
-                                          Text(
-                                            'Select Lead',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Inter",
-                                              color: Color(0xffAFAFAF),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                      // The items to display in the dropdown
-                                      items: data
-                                          .map((source) => DropdownMenuItem(
-                                                value: source,
-                                                child: Text(
-                                                  source.leadsource ?? '',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ))
-                                          .toList(),
-                                      // Set the value to null initially to show the hint
-                                      value: leadsource_id != null &&
-                                              leadsource_id != 0
-                                          ? data.firstWhere(
-                                              (member) =>
-                                                  member.lsid == leadsource_id,
-                                              orElse: () => data[0],
-                                            )
-                                          : null, // Ensure it shows the hint when no valid selection
-                                      onChanged: (value) {
-                                        setState(() {
-                                          // Update the selected value
-                                          leadsource_id = value!.lsid!;
-                                          lead_source = value.leadsource!;
-                                          _validateleadSource = "";
-                                        });
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 35,
-                                        width: w * 0.4,
-                                        padding: const EdgeInsets.only(
-                                            left: 14, right: 14),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                          border: Border.all(
-                                              color: Color(0xffD0CBDB)),
-                                          color: Color(0xffFCFAFF),
-                                        ),
-                                      ),
-                                      iconStyleData: const IconStyleData(
-                                        icon: Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 25,
-                                        ),
-                                        iconSize: 14,
-                                        iconEnabledColor: Colors.black,
-                                        iconDisabledColor: Colors.black,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                          color: Colors.white,
-                                        ),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(40),
-                                          thickness:
-                                              MaterialStateProperty.all(6),
-                                          thumbVisibility:
-                                              MaterialStateProperty.all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData:
-                                          const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 14, right: 14),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_validateleadSource.isNotEmpty) ...[
-                                    Container(
-                                      alignment: Alignment.topLeft,
-                                      margin: EdgeInsets.only(bottom: 5),
-                                      child: ShakeWidget(
-                                        key: Key("value"),
-                                        duration: Duration(milliseconds: 700),
-                                        child: Text(
-                                          _validateleadSource,
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 12,
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ] else ...[
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
-                          ),
-                          Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  _label(text: 'Priority'),
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton2<String>(
-                                      isExpanded: true,
-                                      hint: const Row(
-                                        children: [
-                                          Text(
-                                            'Select priority',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Inter",
-                                              color: Color(0xffAFAFAF),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                      items: items
-                                          .map((String item) =>
-                                              DropdownMenuItem<String>(
-                                                value: item,
-                                                child: Text(
-                                                  item,
-                                                  style: const TextStyle(
-                                                    fontSize: 15,
-                                                    fontWeight: FontWeight.w400,
-                                                    color: Colors.black,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ))
-                                          .toList(),
-                                      value: selectedValue,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          selectedValue = value;
-                                          _validatePriority = "";
-                                        });
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 35,
-                                        width: w * 0.4,
-                                        padding: const EdgeInsets.only(
-                                            left: 14, right: 14),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                          border: Border.all(
-                                            color: Color(0xffD0CBDB),
-                                          ),
-                                          color: Color(0xffFCFAFF),
-                                        ),
-                                      ),
-                                      iconStyleData: const IconStyleData(
-                                        icon: Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 25,
-                                        ),
-                                        iconSize: 14,
-                                        iconEnabledColor: Colors.black,
-                                        iconDisabledColor: Colors.black,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                          color: Colors.white,
-                                        ),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(40),
-                                          thickness:
-                                              MaterialStateProperty.all(6),
-                                          thumbVisibility:
-                                              MaterialStateProperty.all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData:
-                                          const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 14, right: 14),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_validatePriority.isNotEmpty) ...[
-                                    Container(
-                                      alignment: Alignment.topLeft,
-                                      margin: EdgeInsets.only(bottom: 5),
-                                      child: ShakeWidget(
-                                        key: Key("value"),
-                                        duration: Duration(milliseconds: 700),
-                                        child: Text(
-                                          _validatePriority,
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 12,
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ] else ...[
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                              SizedBox(
-                                width: w * 0.02,
-                              ),
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  _label(text: 'Lead owner'),
-                                  DropdownButtonHideUnderline(
-                                    child: DropdownButton2<Staff>(
-                                      isExpanded: true,
-                                      hint: const Row(
-                                        children: [
-                                          Text(
-                                            'Select Staff',
-                                            style: TextStyle(
-                                              fontSize: 14,
-                                              fontWeight: FontWeight.w400,
-                                              fontFamily: "Inter",
-                                              color: Color(0xffAFAFAF),
-                                            ),
-                                            overflow: TextOverflow.ellipsis,
-                                          ),
-                                        ],
-                                      ),
-                                      items: staffList
-                                          .map((staff) => DropdownMenuItem(
-                                                value: staff,
-                                                child: Text(
-                                                  staff.fullname ?? '',
-                                                  style: const TextStyle(
-                                                    fontSize: 14,
-                                                  ),
-                                                  overflow:
-                                                      TextOverflow.ellipsis,
-                                                ),
-                                              ))
-                                          .toList(),
-                                      value: leadowner_id != null &&
-                                              leadowner_id != 0
-                                          ? staffList.firstWhere(
-                                              (member) =>
-                                                  member.uid == leadowner_id,
-                                              orElse: () => staffList[
-                                                  0], // Fallback if not found
-                                            )
-                                          : null,
-                                      onChanged: (value) {
-                                        setState(() {
-                                          leadowner_id = value!.uid!;
-                                          lead_owner = value.fullname ?? '';
-                                          _validateleadOwner = "";
-                                          print("lead_owner:${lead_owner}");
-                                        });
-                                      },
-                                      buttonStyleData: ButtonStyleData(
-                                        height: 35,
-                                        width: w * 0.4,
-                                        padding: const EdgeInsets.only(
-                                            left: 14, right: 14),
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(7),
-                                          border: Border.all(
-                                            color: Color(0xffD0CBDB),
-                                          ),
-                                          color: Color(0xffFCFAFF),
-                                        ),
-                                      ),
-                                      iconStyleData: const IconStyleData(
-                                        icon: Icon(
-                                          Icons.arrow_drop_down,
-                                          size: 25,
-                                        ),
-                                        iconSize: 14,
-                                        iconEnabledColor: Colors.black,
-                                        iconDisabledColor: Colors.black,
-                                      ),
-                                      dropdownStyleData: DropdownStyleData(
-                                        maxHeight: 200,
-                                        decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(14),
-                                          color: Colors.white,
-                                        ),
-                                        scrollbarTheme: ScrollbarThemeData(
-                                          radius: const Radius.circular(40),
-                                          thickness:
-                                              MaterialStateProperty.all(6),
-                                          thumbVisibility:
-                                              MaterialStateProperty.all(true),
-                                        ),
-                                      ),
-                                      menuItemStyleData:
-                                          const MenuItemStyleData(
-                                        height: 40,
-                                        padding: EdgeInsets.only(
-                                            left: 14, right: 14),
-                                      ),
-                                    ),
-                                  ),
-                                  if (_validateleadOwner.isNotEmpty) ...[
-                                    Container(
-                                      alignment: Alignment.topLeft,
-                                      margin: EdgeInsets.only(bottom: 5),
-                                      child: ShakeWidget(
-                                        key: Key("value"),
-                                        duration: Duration(milliseconds: 700),
-                                        child: Text(
-                                          _validateleadOwner,
-                                          style: TextStyle(
-                                            fontFamily: "Poppins",
-                                            fontSize: 12,
-                                            color: Colors.red,
-                                            fontWeight: FontWeight.w500,
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ] else ...[
-                                    const SizedBox(
-                                      height: 15,
-                                    ),
-                                  ],
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _label1(text: 'Price'),
-                                  _buildTextFormField1(
-                                    keyboardType: TextInputType.phone,
-                                      controller: _priceController,
-                                      hintText: '₹ Enter Price',
-                                      validationMessage: _validatePrice),
-                                ],
-                              ),
-                              SizedBox(
-                                width: w * 0.02,
-                              ),
-                              Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  _label1(text: 'City/Town'),
-                                  _buildTextFormField1(
-                                    keyboardType: TextInputType.text,
-                                      controller: _cityController,
-                                      hintText: 'Enter City/Town',
-                                      validationMessage: _validateCity),
-                                ],
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 4),
-                          _label(text: 'Remarks'),
-                          SizedBox(height: 4),
                           Container(
-                            height: h * 0.15,
+                            padding: EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                                color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
-                                border: Border.all(color: Color(0xffE8ECFF))),
-                            child: TextFormField(
-                              cursorColor: Color(0xff8856F4),
-                              scrollPadding: const EdgeInsets.only(top: 5),
-                              controller: _remarksController,
-                              textInputAction: TextInputAction.done,
-                              maxLines: 100,
-                              decoration: InputDecoration(
-                                contentPadding:
-                                    const EdgeInsets.only(left: 10, top: 10),
-                                hintText: "Enter Remarks",
-                                hintStyle: TextStyle(
-                                  fontSize: 15,
-                                  letterSpacing: 0,
-                                  height: 1.2,
-                                  color: Color(0xffAFAFAF),
-                                  fontFamily: 'Poppins',
-                                  fontWeight: FontWeight.w400,
-                                ),
-                                filled: true,
-                                fillColor: Color(0xffFCFAFF),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(7),
-                                  borderSide: BorderSide(
-                                      width: 1, color: Color(0xffD0CBDB)),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(7.0),
-                                  borderSide: BorderSide(
-                                      width: 1, color: Color(0xffD0CBDB)),
-                                ),
-                              ),
+                              color: Color(0xffffffff),
+                              borderRadius: BorderRadius.circular(8),
                             ),
-                          ),
-                          if (_validateRemarks.isNotEmpty) ...[
-                            Container(
-                              alignment: Alignment.topLeft,
-                              margin: EdgeInsets.only(bottom: 5),
-                              child: ShakeWidget(
-                                key: Key("value"),
-                                duration: Duration(milliseconds: 700),
-                                child: Text(
-                                  _validateRemarks,
-                                  style: TextStyle(
-                                    fontFamily: "Poppins",
-                                    fontSize: 12,
-                                    color: Colors.red,
-                                    fontWeight: FontWeight.w500,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Text(
+                                      '${widget.type} Leads',
+                                      style: TextStyle(
+                                        fontFamily: 'Inter',
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.w500,
+                                        height: 21.78 / 16,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 5),
+                                _label(text: 'Lead Date'),
+                                SizedBox(height: 4),
+                                _buildDateField(
+                                  _DateController,
+                                ),
+                                if (_validateDate.isNotEmpty) ...[
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.only(bottom: 5),
+                                    child: ShakeWidget(
+                                      key: Key("value"),
+                                      duration: Duration(milliseconds: 700),
+                                      child: Text(
+                                        _validateDate,
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ] else ...[
+                                  const SizedBox(
+                                    height: 12,
+                                  ),
+                                ],
+                                _label(text: 'Customer Name'),
+                                SizedBox(height: 4),
+                                _buildTextFormField(
+                                    controller: _customerController,
+                                    hintText: 'Enter Customer Name',
+                                    validationMessage: _validateCustomer,
+                                    keyboardType: TextInputType.text),
+                                _label1(text: 'Company Name'),
+                                SizedBox(height: 4),
+                                _buildTextFormField(
+                                    controller: _companyController,
+                                    hintText: 'Enter Company Name',
+                                    validationMessage: _validateCompany,
+                                    keyboardType: TextInputType.text),
+                                _label(text: 'Phone Number'),
+                                SizedBox(height: 4),
+                                _buildTextFormField(
+                                    inputFormatters: [
+                                      LengthLimitingTextInputFormatter(10),
+                                    ],
+                                    controller: _phoneNumberController,
+                                    hintText: ' Phone Number',
+                                    validationMessage: _validatePhoneNumber,
+                                    keyboardType: TextInputType.phone),
+                                _label(text: 'Email ID'),
+                                SizedBox(height: 4),
+                                _buildTextFormField(
+                                    controller: _emailController,
+                                    hintText: 'Enter Email',
+                                    validationMessage: _validateemail,
+                                    keyboardType: TextInputType.emailAddress),
+                                SizedBox(height: 4),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        _label(text: 'Service Required'),
+                                        DropdownButtonHideUnderline(
+                                          child: DropdownButton2<Services>(
+                                            isExpanded: true,
+                                            hint: const Row(
+                                              children: [
+                                                Text(
+                                                  'Select service',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Inter",
+                                                    color: Color(0xffAFAFAF),
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            items: servicelist
+                                                .map((service) =>
+                                                    DropdownMenuItem(
+                                                      value: service,
+                                                      child: Text(
+                                                        service.projectName ??
+                                                            '',
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            value: serviceid != null &&
+                                                    serviceid != 0
+                                                ? servicelist.firstWhere(
+                                                    (member) =>
+                                                        member.pid == serviceid,
+                                                    orElse: () =>
+                                                        servicelist[0],
+                                                  )
+                                                : null,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                serviceid = value!.pid!;
+                                                servicename =
+                                                    value!.projectName!;
+                                                _validateservice = "";
+                                              });
+                                            },
+                                            buttonStyleData: ButtonStyleData(
+                                              height: 35,
+                                              width: w * 0.4,
+                                              padding: const EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                border: Border.all(
+                                                  color: Color(0xffD0CBDB),
+                                                ),
+                                                color: Color(0xffFCFAFF),
+                                              ),
+                                            ),
+                                            iconStyleData: const IconStyleData(
+                                              icon: Icon(
+                                                Icons.arrow_drop_down,
+                                                size: 25,
+                                              ),
+                                              iconSize: 14,
+                                              iconEnabledColor: Colors.black,
+                                              iconDisabledColor: Colors.black,
+                                            ),
+                                            dropdownStyleData:
+                                                DropdownStyleData(
+                                              maxHeight: 200,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                color: Colors.white,
+                                              ),
+                                              scrollbarTheme:
+                                                  ScrollbarThemeData(
+                                                radius:
+                                                    const Radius.circular(40),
+                                                thickness:
+                                                    MaterialStateProperty.all(
+                                                        6),
+                                                thumbVisibility:
+                                                    MaterialStateProperty.all(
+                                                        true),
+                                              ),
+                                            ),
+                                            menuItemStyleData:
+                                                const MenuItemStyleData(
+                                              height: 40,
+                                              padding: EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                            ),
+                                          ),
+                                        ),
+                                        if (_validateservice.isNotEmpty) ...[
+                                          Container(
+                                            alignment: Alignment.topLeft,
+                                            margin: EdgeInsets.only(bottom: 5),
+                                            child: ShakeWidget(
+                                              key: Key("value"),
+                                              duration:
+                                                  Duration(milliseconds: 700),
+                                              child: Text(
+                                                _validateservice,
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 12,
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          const SizedBox(
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: w * 0.02,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        _label(text: 'Lead source'),
+                                        DropdownButtonHideUnderline(
+                                          child: DropdownButton2<Data>(
+                                            isExpanded: true,
+                                            // The hint is shown when no value is selected
+                                            hint: const Row(
+                                              children: [
+                                                Text(
+                                                  'Select Lead',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Inter",
+                                                    color: Color(0xffAFAFAF),
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                            // The items to display in the dropdown
+                                            items: data
+                                                .map((source) =>
+                                                    DropdownMenuItem(
+                                                      value: source,
+                                                      child: Text(
+                                                        source.leadsource ?? '',
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            // Set the value to null initially to show the hint
+                                            value: leadsource_id != null &&
+                                                    leadsource_id != 0
+                                                ? data.firstWhere(
+                                                    (member) =>
+                                                        member.lsid ==
+                                                        leadsource_id,
+                                                    orElse: () => data[0],
+                                                  )
+                                                : null, // Ensure it shows the hint when no valid selection
+                                            onChanged: (value) {
+                                              setState(() {
+                                                // Update the selected value
+                                                leadsource_id = value!.lsid!;
+                                                lead_source = value.leadsource!;
+                                                _validateleadSource = "";
+                                              });
+                                            },
+                                            buttonStyleData: ButtonStyleData(
+                                              height: 35,
+                                              width: w * 0.4,
+                                              padding: const EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                border: Border.all(
+                                                    color: Color(0xffD0CBDB)),
+                                                color: Color(0xffFCFAFF),
+                                              ),
+                                            ),
+                                            iconStyleData: const IconStyleData(
+                                              icon: Icon(
+                                                Icons.arrow_drop_down,
+                                                size: 25,
+                                              ),
+                                              iconSize: 14,
+                                              iconEnabledColor: Colors.black,
+                                              iconDisabledColor: Colors.black,
+                                            ),
+                                            dropdownStyleData:
+                                                DropdownStyleData(
+                                              maxHeight: 200,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                color: Colors.white,
+                                              ),
+                                              scrollbarTheme:
+                                                  ScrollbarThemeData(
+                                                radius:
+                                                    const Radius.circular(40),
+                                                thickness:
+                                                    MaterialStateProperty.all(
+                                                        6),
+                                                thumbVisibility:
+                                                    MaterialStateProperty.all(
+                                                        true),
+                                              ),
+                                            ),
+                                            menuItemStyleData:
+                                                const MenuItemStyleData(
+                                              height: 40,
+                                              padding: EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                            ),
+                                          ),
+                                        ),
+                                        if (_validateleadSource.isNotEmpty) ...[
+                                          Container(
+                                            alignment: Alignment.topLeft,
+                                            margin: EdgeInsets.only(bottom: 5),
+                                            child: ShakeWidget(
+                                              key: Key("value"),
+                                              duration:
+                                                  Duration(milliseconds: 700),
+                                              child: Text(
+                                                _validateleadSource,
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 12,
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          const SizedBox(
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        _label(text: 'Priority'),
+                                        DropdownButtonHideUnderline(
+                                          child: DropdownButton2<String>(
+                                            isExpanded: true,
+                                            hint: const Row(
+                                              children: [
+                                                Text(
+                                                  'Select priority',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Inter",
+                                                    color: Color(0xffAFAFAF),
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                            items: items
+                                                .map((String item) =>
+                                                    DropdownMenuItem<String>(
+                                                      value: item,
+                                                      child: Text(
+                                                        item,
+                                                        style: const TextStyle(
+                                                          fontSize: 15,
+                                                          fontWeight:
+                                                              FontWeight.w400,
+                                                          color: Colors.black,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            value: selectedValue,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                selectedValue = value;
+                                                _validatePriority = "";
+                                              });
+                                            },
+                                            buttonStyleData: ButtonStyleData(
+                                              height: 35,
+                                              width: w * 0.4,
+                                              padding: const EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                border: Border.all(
+                                                  color: Color(0xffD0CBDB),
+                                                ),
+                                                color: Color(0xffFCFAFF),
+                                              ),
+                                            ),
+                                            iconStyleData: const IconStyleData(
+                                              icon: Icon(
+                                                Icons.arrow_drop_down,
+                                                size: 25,
+                                              ),
+                                              iconSize: 14,
+                                              iconEnabledColor: Colors.black,
+                                              iconDisabledColor: Colors.black,
+                                            ),
+                                            dropdownStyleData:
+                                                DropdownStyleData(
+                                              maxHeight: 200,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                color: Colors.white,
+                                              ),
+                                              scrollbarTheme:
+                                                  ScrollbarThemeData(
+                                                radius:
+                                                    const Radius.circular(40),
+                                                thickness:
+                                                    MaterialStateProperty.all(
+                                                        6),
+                                                thumbVisibility:
+                                                    MaterialStateProperty.all(
+                                                        true),
+                                              ),
+                                            ),
+                                            menuItemStyleData:
+                                                const MenuItemStyleData(
+                                              height: 40,
+                                              padding: EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                            ),
+                                          ),
+                                        ),
+                                        if (_validatePriority.isNotEmpty) ...[
+                                          Container(
+                                            alignment: Alignment.topLeft,
+                                            margin: EdgeInsets.only(bottom: 5),
+                                            child: ShakeWidget(
+                                              key: Key("value"),
+                                              duration:
+                                                  Duration(milliseconds: 700),
+                                              child: Text(
+                                                _validatePriority,
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 12,
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          const SizedBox(
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: w * 0.02,
+                                    ),
+                                    Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      children: [
+                                        _label(text: 'Lead owner'),
+                                        DropdownButtonHideUnderline(
+                                          child: DropdownButton2<Staff>(
+                                            isExpanded: true,
+                                            hint: const Row(
+                                              children: [
+                                                Text(
+                                                  'Select Staff',
+                                                  style: TextStyle(
+                                                    fontSize: 14,
+                                                    fontWeight: FontWeight.w400,
+                                                    fontFamily: "Inter",
+                                                    color: Color(0xffAFAFAF),
+                                                  ),
+                                                  overflow:
+                                                      TextOverflow.ellipsis,
+                                                ),
+                                              ],
+                                            ),
+                                            items: staffList
+                                                .map((staff) =>
+                                                    DropdownMenuItem(
+                                                      value: staff,
+                                                      child: Text(
+                                                        staff.fullname ?? '',
+                                                        style: const TextStyle(
+                                                          fontSize: 14,
+                                                        ),
+                                                        overflow: TextOverflow
+                                                            .ellipsis,
+                                                      ),
+                                                    ))
+                                                .toList(),
+                                            value: leadowner_id != null &&
+                                                    leadowner_id != 0
+                                                ? staffList.firstWhere(
+                                                    (member) =>
+                                                        member.uid ==
+                                                        leadowner_id,
+                                                    orElse: () => staffList[
+                                                        0], // Fallback if not found
+                                                  )
+                                                : null,
+                                            onChanged: (value) {
+                                              setState(() {
+                                                leadowner_id = value!.uid!;
+                                                lead_owner =
+                                                    value.fullname ?? '';
+                                                _validateleadOwner = "";
+                                                print(
+                                                    "lead_owner:${lead_owner}");
+                                              });
+                                            },
+                                            buttonStyleData: ButtonStyleData(
+                                              height: 35,
+                                              width: w * 0.4,
+                                              padding: const EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(7),
+                                                border: Border.all(
+                                                  color: Color(0xffD0CBDB),
+                                                ),
+                                                color: Color(0xffFCFAFF),
+                                              ),
+                                            ),
+                                            iconStyleData: const IconStyleData(
+                                              icon: Icon(
+                                                Icons.arrow_drop_down,
+                                                size: 25,
+                                              ),
+                                              iconSize: 14,
+                                              iconEnabledColor: Colors.black,
+                                              iconDisabledColor: Colors.black,
+                                            ),
+                                            dropdownStyleData:
+                                                DropdownStyleData(
+                                              maxHeight: 200,
+                                              decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(14),
+                                                color: Colors.white,
+                                              ),
+                                              scrollbarTheme:
+                                                  ScrollbarThemeData(
+                                                radius:
+                                                    const Radius.circular(40),
+                                                thickness:
+                                                    MaterialStateProperty.all(
+                                                        6),
+                                                thumbVisibility:
+                                                    MaterialStateProperty.all(
+                                                        true),
+                                              ),
+                                            ),
+                                            menuItemStyleData:
+                                                const MenuItemStyleData(
+                                              height: 40,
+                                              padding: EdgeInsets.only(
+                                                  left: 14, right: 14),
+                                            ),
+                                          ),
+                                        ),
+                                        if (_validateleadOwner.isNotEmpty) ...[
+                                          Container(
+                                            alignment: Alignment.topLeft,
+                                            margin: EdgeInsets.only(bottom: 5),
+                                            child: ShakeWidget(
+                                              key: Key("value"),
+                                              duration:
+                                                  Duration(milliseconds: 700),
+                                              child: Text(
+                                                _validateleadOwner,
+                                                style: TextStyle(
+                                                  fontFamily: "Poppins",
+                                                  fontSize: 12,
+                                                  color: Colors.red,
+                                                  fontWeight: FontWeight.w500,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ] else ...[
+                                          const SizedBox(
+                                            height: 15,
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _label1(text: 'Price'),
+                                        _buildTextFormField1(
+                                            keyboardType: TextInputType.phone,
+                                            controller: _priceController,
+                                            hintText: '₹ Enter Price',
+                                            validationMessage: _validatePrice),
+                                      ],
+                                    ),
+                                    SizedBox(
+                                      width: w * 0.02,
+                                    ),
+                                    Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.start,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        _label1(text: 'City/Town'),
+                                        _buildTextFormField1(
+                                            keyboardType: TextInputType.text,
+                                            controller: _cityController,
+                                            hintText: 'Enter City/Town',
+                                            validationMessage: _validateCity),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 4),
+                                _label(text: 'Remarks'),
+                                SizedBox(height: 4),
+                                Container(
+                                  height: h * 0.15,
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(20),
+                                      border:
+                                          Border.all(color: Color(0xffE8ECFF))),
+                                  child: TextFormField(
+                                    cursorColor: Color(0xff8856F4),
+                                    scrollPadding:
+                                        const EdgeInsets.only(top: 5),
+                                    controller: _remarksController,
+                                    textInputAction: TextInputAction.done,
+                                    maxLines: 100,
+                                    decoration: InputDecoration(
+                                      contentPadding: const EdgeInsets.only(
+                                          left: 10, top: 10),
+                                      hintText: "Enter Remarks",
+                                      hintStyle: TextStyle(
+                                        fontSize: 15,
+                                        letterSpacing: 0,
+                                        height: 1.2,
+                                        color: Color(0xffAFAFAF),
+                                        fontFamily: 'Poppins',
+                                        fontWeight: FontWeight.w400,
+                                      ),
+                                      filled: true,
+                                      fillColor: Color(0xffFCFAFF),
+                                      enabledBorder: OutlineInputBorder(
+                                        borderRadius: BorderRadius.circular(7),
+                                        borderSide: BorderSide(
+                                            width: 1, color: Color(0xffD0CBDB)),
+                                      ),
+                                      focusedBorder: OutlineInputBorder(
+                                        borderRadius:
+                                            BorderRadius.circular(7.0),
+                                        borderSide: BorderSide(
+                                            width: 1, color: Color(0xffD0CBDB)),
+                                      ),
+                                    ),
                                   ),
                                 ),
-                              ),
+                                if (_validateRemarks.isNotEmpty) ...[
+                                  Container(
+                                    alignment: Alignment.topLeft,
+                                    margin: EdgeInsets.only(bottom: 5),
+                                    child: ShakeWidget(
+                                      key: Key("value"),
+                                      duration: Duration(milliseconds: 700),
+                                      child: Text(
+                                        _validateRemarks,
+                                        style: TextStyle(
+                                          fontFamily: "Poppins",
+                                          fontSize: 12,
+                                          color: Colors.red,
+                                          fontWeight: FontWeight.w500,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ] else ...[
+                                  const SizedBox(
+                                    height: 15,
+                                  ),
+                                ],
+                              ],
                             ),
-                          ] else ...[
-                            const SizedBox(
-                              height: 15,
-                            ),
-                          ],
+                          ),
                         ],
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ),
+                  ),
             bottomNavigationBar: Container(
               padding: EdgeInsets.all(15),
               decoration: BoxDecoration(color: Colors.white),
@@ -1130,7 +1180,7 @@ class _AddLeadsState extends State<AddLeads> {
                 children: [
                   InkResponse(
                     onTap: () {
-                      Navigator.pop(context,true);
+                      Navigator.pop(context, true);
                     },
                     child: Container(
                       height: 40,
@@ -1159,12 +1209,10 @@ class _AddLeadsState extends State<AddLeads> {
                   Spacer(),
                   InkResponse(
                     onTap: () {
-                      if(_isSaving){
-
-                      }else{
+                      if (_isSaving) {
+                      } else {
                         _validateFields();
                       }
-
                     },
                     child: Container(
                       height: 40,

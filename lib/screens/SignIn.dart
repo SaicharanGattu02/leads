@@ -57,6 +57,7 @@ class _SignInWithEmailState extends State<SignInWithEmail> {
         final int expiryTimestamp = currentTime + (response?.expiresIn ?? 0);
 
          PreferenceService().saveString('access_token', response?.accessToken??"");
+         PreferenceService().saveString('refresh_token', response?.refreshToken??"");
          PreferenceService().saveInt('user_id', response?.userId ?? 0);
          PreferenceService().saveInt('expiry_time', expiryTimestamp);
 

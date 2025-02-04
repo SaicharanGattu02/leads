@@ -82,17 +82,20 @@ class _ViewLeadsState extends State<ViewLeads> {
     super.dispose();
   }
 
+  Future<void> _refreshData() async {
+    setState(() {
+      GetLeads();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
-
-
     var w = MediaQuery.of(context).size.width;
     var h = MediaQuery.of(context).size.width;
     var connectiVityStatus = Provider.of<ConnectivityProviders>(context);
     return (connectiVityStatus.isDeviceConnected == "ConnectivityResult.wifi" ||
             connectiVityStatus.isDeviceConnected == "ConnectivityResult.mobile")
         ? Scaffold(
-
             // backgroundColor: const Color(0xffF3ECFB),
             appBar: AppBar(
               backgroundColor: Color(0xff02017d),
@@ -132,7 +135,8 @@ class _ViewLeadsState extends State<ViewLeads> {
                                 AddLeads(id: '', type: 'Add')));
                     print("Response from AddLeads: $res");
                     if (res == true) {
-                      Provider.of<ViewLeadsProviders>(context, listen: false).getLeadsData(context);
+                      Provider.of<ViewLeadsProviders>(context, listen: false)
+                          .getLeadsData(context);
                     }
                   },
                   child: Container(
@@ -194,7 +198,8 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                     delegate:
                                                         SliverChildBuilderDelegate(
                                                             (context, index) {
-                                                  final lead = leadlistprovider.leadslist[index];
+                                                  final lead = leadlistprovider
+                                                      .leadslist[index];
 
                                                   return Column(
                                                     children: [
@@ -322,13 +327,17 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                                       w * 0.01,
                                                                 ),
                                                                 InkResponse(
-                                                                  onTap: () {
-                                                                    Navigator.push(
+                                                                  onTap:
+                                                                      () async {
+                                                                    final result = await Navigator.push(
                                                                         context,
                                                                         MaterialPageRoute(
                                                                             builder: (context) =>
                                                                                 AddLeads(id: lead.leadid.toString(), type: 'Edit')));
-
+                                                                    if (result ==
+                                                                        true) {
+                                                                      _refreshData();
+                                                                    }
                                                                   },
                                                                   child:
                                                                       Container(
@@ -462,7 +471,8 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                                             Center(
                                                                           child:
                                                                               Text(
-                                                                            lead.leadSourceName?[0].leadsource??'',
+                                                                            lead.leadSourceName?[0].leadsource ??
+                                                                                '',
                                                                             style: TextStyle(
                                                                                 color: Color(0xff147324),
                                                                                 fontSize: 12,
@@ -571,7 +581,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                                             Row(
                                                                           children: [
                                                                             Text(
-                                                                              lead.titleName?[0].projectName??"",
+                                                                              lead.titleName?[0].projectName ?? "",
                                                                               style: TextStyle(color: Color(0xff1C1D22), fontSize: 15, fontFamily: 'Inter'),
                                                                             ),
                                                                             Spacer(),
@@ -860,12 +870,13 @@ class _ViewLeadsState extends State<ViewLeads> {
                                   sharedPreferences.remove('access_token');
                                   Navigator.push(
                                       context,
-
                                       MaterialPageRoute(
-                                          builder: (context) => SignInWithEmail()));
+                                          builder: (context) =>
+                                              SignInWithEmail()));
                                 },
                                 style: OutlinedButton.styleFrom(
-                                  foregroundColor: Color(0xff02017d), // Text color
+                                  foregroundColor:
+                                      Color(0xff02017d), // Text color
                                   side: BorderSide(
                                       color: Color(0xff02017d)), // Border color
                                   padding: const EdgeInsets.symmetric(
