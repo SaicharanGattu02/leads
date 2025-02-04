@@ -194,8 +194,8 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                     delegate:
                                                         SliverChildBuilderDelegate(
                                                             (context, index) {
-                                                  final lead = leadlistprovider
-                                                      .leadslist[index];
+                                                  final lead = leadlistprovider.leadslist[index];
+
                                                   return Column(
                                                     children: [
                                                       Container(
@@ -327,7 +327,8 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                                         context,
                                                                         MaterialPageRoute(
                                                                             builder: (context) =>
-                                                                                AddLeads(id: lead.leadid.toString() ?? "", type: 'Edit')));
+                                                                                AddLeads(id: lead.leadid.toString(), type: 'Edit')));
+
                                                                   },
                                                                   child:
                                                                       Container(
@@ -461,8 +462,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                                             Center(
                                                                           child:
                                                                               Text(
-                                                                            lead.leadsource ??
-                                                                                "",
+                                                                            lead.leadSourceName?[0].leadsource??'',
                                                                             style: TextStyle(
                                                                                 color: Color(0xff147324),
                                                                                 fontSize: 12,
@@ -571,7 +571,7 @@ class _ViewLeadsState extends State<ViewLeads> {
                                                                             Row(
                                                                           children: [
                                                                             Text(
-                                                                              lead.title ?? "",
+                                                                              lead.titleName?[0].projectName??"",
                                                                               style: TextStyle(color: Color(0xff1C1D22), fontSize: 15, fontFamily: 'Inter'),
                                                                             ),
                                                                             Spacer(),

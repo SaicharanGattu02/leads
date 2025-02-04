@@ -129,12 +129,19 @@ class _AddLeadsState extends State<AddLeads> {
 
   Future<void> loadData() async {
     try {
+      // First, check if the token is valid.
       bool isTokenValid = await CheckHeaderValidity();
       if (!isTokenValid) {
         print("Token refresh failed. Stopping API calls.");
         return;
       }
-      await Future.wait([services(), sourceList(), staff(),getEdit()]);
+
+      // Wait for services, sourceList, and staff to complete first.
+      await Future.wait([services(), sourceList(), staff()]);
+
+      // After these three are done, then call getEdit().
+      await getEdit();
+
     } catch (e, stackTrace) {
       print("Error loading data: $e\n$stackTrace");
     } finally {
@@ -143,6 +150,7 @@ class _AddLeadsState extends State<AddLeads> {
       });
     }
   }
+
 
 
   void _validateFields() {
@@ -231,17 +239,39 @@ class _AddLeadsState extends State<AddLeads> {
               _priceController.text = leadseditdata[0].value.toString() ?? "";
               _cityController.text = leadseditdata[0].town ?? "";
               _remarksController.text = leadseditdata[0].description ?? "";
+              String leadsource = leadseditdata[0].leadSourceName?[0].leadsource??"";
 
-              String leadsource = leadseditdata[0].leadsource ?? "";
+              String serviceName = leadseditdata[0].titleName?[0].projectName??"";
+              String leadowner = leadseditdata[0].owner??"";
 
               var selectedSource = data.firstWhere(
                 (source) => source.leadsource == leadsource,
                 orElse: () => data.first,
               );
 
+              var selectedOwner = staffList.firstWhere(
+                    (source) => source.fullname == leadowner,
+                orElse: () => staffList.first,
+              );
+
+              var selectedService = servicelist.firstWhere(
+                    (source) => source.projectName == serviceName,
+                orElse: () => servicelist.first,
+              );
+
+
               if (selectedSource != null) {
                 leadsource_id = selectedSource.lsid;
               }
+              if (selectedService != null) {
+                serviceid = selectedService.pid;
+              }
+
+              if (selectedOwner != null) {
+                leadowner_id = selectedOwner.uid??0;
+              }
+
+
             }
             print('datalead>>${leadseditdata}');
           } else {
@@ -273,8 +303,8 @@ class _AddLeadsState extends State<AddLeads> {
 
   List<Staff> staffList = [];
   Future<void> staff() async {
-    leadowner_id = await PreferenceService().getInt('user_id') ?? 0;
-    print("leadowner_id:${leadowner_id}");
+      leadowner_id = await PreferenceService().getInt('user_id') ?? 0;
+      print("leadowner_id:${leadowner_id}");
     var res = await Userapi.getStaff();
     setState(() {
       if (res != null) {
@@ -300,8 +330,8 @@ class _AddLeadsState extends State<AddLeads> {
             _companyController.text,
             _phoneNumberController.text,
             _emailController.text,
-            servicename!,
-            lead_source!,
+            serviceid.toString(),
+            leadsource_id.toString(),
             selectedValue.toString(),
             lead_owner!,
             _priceController.text,
@@ -316,8 +346,8 @@ class _AddLeadsState extends State<AddLeads> {
             _companyController.text,
             _phoneNumberController.text,
             _emailController.text,
-            servicename ?? "",
-            lead_source ?? "",
+            serviceid.toString(),
+            leadsource_id.toString(),
             selectedValue.toString(),
             lead_owner ?? "",
             _priceController.text,
@@ -998,6 +1028,7 @@ class _AddLeadsState extends State<AddLeads> {
                                 children: [
                                   _label1(text: 'Price'),
                                   _buildTextFormField1(
+                                    keyboardType: TextInputType.phone,
                                       controller: _priceController,
                                       hintText: '₹ Enter Price',
                                       validationMessage: _validatePrice),
@@ -1012,6 +1043,7 @@ class _AddLeadsState extends State<AddLeads> {
                                 children: [
                                   _label1(text: 'City/Town'),
                                   _buildTextFormField1(
+                                    keyboardType: TextInputType.text,
                                       controller: _cityController,
                                       hintText: 'Enter City/Town',
                                       validationMessage: _validateCity),
@@ -1265,7 +1297,7 @@ class _AddLeadsState extends State<AddLeads> {
       bool obscureText = false,
       required String hintText,
       required String validationMessage,
-      TextInputType keyboardType = TextInputType.text,
+      TextInputType? keyboardType = TextInputType.text,
       Widget? prefixicon,
       Widget? suffixicon}) {
     return Column(

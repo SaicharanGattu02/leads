@@ -28,43 +28,47 @@ class LeadsEdit {
   int? leadid;
   String? customer;
   String? ogrinazation;
-  Null? contactperson;
-  String? title;
+  String? contactperson;
+  int? title;
+  String? titleId;
   String? description;
   int? value;
-  Null? currency;
+  String? currency;
   String? label;
   String? owner;
   int? leadownerid;
   int? phone;
-  Null? phonetype;
+  String? phonetype;
   String? email;
-  Null? emailtype;
-  Null? addressline1;
-  Null? addressline2;
-  Null? addressline3;
+  String? emailtype;
+  String? addressline1;
+  String? addressline2;
+  String? addressline3;
   String? town;
-  Null? state;
-  Null? zipcode;
-  Null? country;
+  String? state;
+  String? zipcode;
+  String? country;
   String? createdAt;
   String? createdBy;
   int? createdById;
   int? status;
-  Null? expacteddate;
-  Null? filepath;
-  Null? content;
-  Null? team;
+  String? expacteddate;
+  String? filepath;
+  String? content;
+  String? team;
   int? dealstatus;
-  Null? leadComments;
-  Null? dealfixdate;
-  String? leadsource;
+  String? leadComments;
+  String? dealfixdate;
+  int? leadsource;
   int? leadstage;
   String? color;
   String? leadstagetext;
   String? companyid;
-  Null? leaddata;
-  Null? dealdata;
+  String? leaddata;
+  String? dealdata;
+  User? user;
+  List<TitleName>? titleName;
+  List<LeadSourceName>? leadSourceName;
 
   LeadsEdit(
       {this.leadid,
@@ -72,6 +76,7 @@ class LeadsEdit {
         this.ogrinazation,
         this.contactperson,
         this.title,
+        this.titleId,
         this.description,
         this.value,
         this.currency,
@@ -106,7 +111,10 @@ class LeadsEdit {
         this.leadstagetext,
         this.companyid,
         this.leaddata,
-        this.dealdata});
+        this.dealdata,
+        this.user,
+        this.titleName,
+        this.leadSourceName});
 
   LeadsEdit.fromJson(Map<String, dynamic> json) {
     leadid = json['leadid'];
@@ -114,6 +122,7 @@ class LeadsEdit {
     ogrinazation = json['ogrinazation'];
     contactperson = json['contactperson'];
     title = json['title'];
+    titleId = json['title_id'];
     description = json['description'];
     value = json['value'];
     currency = json['currency'];
@@ -149,6 +158,19 @@ class LeadsEdit {
     companyid = json['companyid'];
     leaddata = json['leaddata'];
     dealdata = json['dealdata'];
+    user = json['user'] != null ? new User.fromJson(json['user']) : null;
+    if (json['title_name'] != null) {
+      titleName = <TitleName>[];
+      json['title_name'].forEach((v) {
+        titleName!.add(new TitleName.fromJson(v));
+      });
+    }
+    if (json['lead_source_name'] != null) {
+      leadSourceName = <LeadSourceName>[];
+      json['lead_source_name'].forEach((v) {
+        leadSourceName!.add(new LeadSourceName.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -158,6 +180,7 @@ class LeadsEdit {
     data['ogrinazation'] = this.ogrinazation;
     data['contactperson'] = this.contactperson;
     data['title'] = this.title;
+    data['title_id'] = this.titleId;
     data['description'] = this.description;
     data['value'] = this.value;
     data['currency'] = this.currency;
@@ -193,6 +216,175 @@ class LeadsEdit {
     data['companyid'] = this.companyid;
     data['leaddata'] = this.leaddata;
     data['dealdata'] = this.dealdata;
+    if (this.user != null) {
+      data['user'] = this.user!.toJson();
+    }
+    if (this.titleName != null) {
+      data['title_name'] = this.titleName!.map((v) => v.toJson()).toList();
+    }
+    if (this.leadSourceName != null) {
+      data['lead_source_name'] =
+          this.leadSourceName!.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+
+class User {
+  int? uid;
+  String? email;
+  String? fullname;
+  int? role;
+  int? mobile;
+  String? designation;
+  String? imagepath;
+  int? status;
+  String? companyname;
+  String? companyid;
+  String? regdate;
+  String? reregistrationdate;
+  String? regendingdate;
+  int? plantype;
+  int? expstatus;
+  int? editAccess;
+  int? deleteAccess;
+  String? createdAt;
+  String? updatedAt;
+  int? emailOtp;
+  int? emailOtpStatus;
+  String? emailOtpTime;
+
+  User(
+      {this.uid,
+        this.email,
+        this.fullname,
+        this.role,
+        this.mobile,
+        this.designation,
+        this.imagepath,
+        this.status,
+        this.companyname,
+        this.companyid,
+        this.regdate,
+        this.reregistrationdate,
+        this.regendingdate,
+        this.plantype,
+        this.expstatus,
+        this.editAccess,
+        this.deleteAccess,
+        this.createdAt,
+        this.updatedAt,
+        this.emailOtp,
+        this.emailOtpStatus,
+        this.emailOtpTime});
+
+  User.fromJson(Map<String, dynamic> json) {
+    uid = json['uid'];
+    email = json['email'];
+    fullname = json['fullname'];
+    role = json['role'];
+    mobile = json['mobile'];
+    designation = json['designation'];
+    imagepath = json['imagepath'];
+    status = json['status'];
+    companyname = json['companyname'];
+    companyid = json['companyid'];
+    regdate = json['regdate'];
+    reregistrationdate = json['reregistrationdate'];
+    regendingdate = json['regendingdate'];
+    plantype = json['plantype'];
+    expstatus = json['expstatus'];
+    editAccess = json['edit_access'];
+    deleteAccess = json['delete_access'];
+    createdAt = json['created_at'];
+    updatedAt = json['updated_at'];
+    emailOtp = json['emailOtp'];
+    emailOtpStatus = json['emailOtp_status'];
+    emailOtpTime = json['emailOtp_time'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['uid'] = this.uid;
+    data['email'] = this.email;
+    data['fullname'] = this.fullname;
+    data['role'] = this.role;
+    data['mobile'] = this.mobile;
+    data['designation'] = this.designation;
+    data['imagepath'] = this.imagepath;
+    data['status'] = this.status;
+    data['companyname'] = this.companyname;
+    data['companyid'] = this.companyid;
+    data['regdate'] = this.regdate;
+    data['reregistrationdate'] = this.reregistrationdate;
+    data['regendingdate'] = this.regendingdate;
+    data['plantype'] = this.plantype;
+    data['expstatus'] = this.expstatus;
+    data['edit_access'] = this.editAccess;
+    data['delete_access'] = this.deleteAccess;
+    data['created_at'] = this.createdAt;
+    data['updated_at'] = this.updatedAt;
+    data['emailOtp'] = this.emailOtp;
+    data['emailOtp_status'] = this.emailOtpStatus;
+    data['emailOtp_time'] = this.emailOtpTime;
+    return data;
+  }
+}
+
+class TitleName {
+  int? pid;
+  String? projectName;
+  int? amount;
+  String? companyid;
+  String? projectimage;
+
+  TitleName(
+      {this.pid,
+        this.projectName,
+        this.amount,
+        this.companyid,
+        this.projectimage});
+
+  TitleName.fromJson(Map<String, dynamic> json) {
+    pid = json['pid'];
+    projectName = json['Project_Name'];
+    amount = json['amount'];
+    companyid = json['companyid'];
+    projectimage = json['projectimage'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['pid'] = this.pid;
+    data['Project_Name'] = this.projectName;
+    data['amount'] = this.amount;
+    data['companyid'] = this.companyid;
+    data['projectimage'] = this.projectimage;
+    return data;
+  }
+}
+
+class LeadSourceName {
+  int? lsid;
+  String? leadsource;
+  String? companyid;
+  String? imagepath;
+
+  LeadSourceName({this.lsid, this.leadsource, this.companyid, this.imagepath});
+
+  LeadSourceName.fromJson(Map<String, dynamic> json) {
+    lsid = json['lsid'];
+    leadsource = json['leadsource'];
+    companyid = json['companyid'];
+    imagepath = json['imagepath'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['lsid'] = this.lsid;
+    data['leadsource'] = this.leadsource;
+    data['companyid'] = this.companyid;
+    data['imagepath'] = this.imagepath;
     return data;
   }
 }
