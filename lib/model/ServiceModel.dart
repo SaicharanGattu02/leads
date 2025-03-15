@@ -29,7 +29,7 @@ class Services {
   String? projectName;
   int? amount;
   String? companyid;
-  Null? projectimage;
+  String? projectimage;
 
   Services(
       {this.pid,
